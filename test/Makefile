@@ -2,8 +2,8 @@ $ cat Makefile
 # Makefile
 # target files or dependency files can all take paths with them
 # eg. 3 folders: a, b ,c
-#   main.c 	 in a,
-#   main.o 	 in b,
+#   main.c   in a,
+#   main.o   in b,
 #   main.out in c
 
 c/main.out : b/main.o
