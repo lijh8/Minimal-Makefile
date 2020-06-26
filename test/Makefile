@@ -1,36 +1,38 @@
 $ cat Makefile
-
 # Makefile
-# 目标文件名、依赖文件名，都可以带路径名
-# 有a，b，c，这3个目录，
-# main.c在a目录，对象.o文件会生成到b目录，可执行文件会生成到c目录。
+# target files or dependency files can all take paths with them
+# eg. 3 folders: a, b ,c
+#   main.c 	 in a,
+#   main.o 	 in b,
+#   main.out in c
 
-c/a.out : b/main.o
+c/main.out : b/main.o
+	mkdir -p $(dir $@)
 	cc $^ -o $@
 
 b/main.o : a/main.c
+	mkdir -p $(dir $@)
 	cc -c $< -o $@
 
-$
-$ cat main.c
-
+$ cat a/main.c
 #include <stdio.h>
 
 int main()
 {
-    printf("%s:%d\n", __FILE__, __LINE__);
+    printf("hello\n");
     return 0;
 }
-$
+
 $ make
-$
-$ find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+
+$ tree .
 .
-|____Makefile
-|____a
-| |____main.c
-|____c
-| |____a.out
-|____b
-| |____main.o
-$ 
+├── a
+│   └── main.c
+├── b
+│   └── main.o
+├── c
+│   └── main.out
+└── Makefile
+
+$
