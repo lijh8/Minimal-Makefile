@@ -34,4 +34,4 @@ $(DIR)/%.o : %.cpp
 -include $(DEP)
 
 clean :
-	rm $(OUT) $(OBJ) $(DEP)
+	rm -fr $(OUT) $(DIR) $(DEP)
