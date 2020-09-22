@@ -4,7 +4,7 @@
 # 2. Source files in folders with Makefile or below
 #
 # .
-# ├── a.c
+# ├── main.c
 # ├── f1.c
 # ├── f1.h
 # ├── f2
