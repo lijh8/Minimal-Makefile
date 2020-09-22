@@ -1,0 +1,38 @@
+# Generic Makefile
+#
+# 1. Prerequisites on header files generated
+# 2. Source files in folders with Makefile or below
+#
+# .
+# ├── a.cpp
+# ├── f1.cpp
+# ├── f1.h
+# ├── f2
+# │   ├── f2.cpp
+# │   └── f2.h
+# └── Makefile
+#
+
+OUT      = a.out
+SRC      = $(shell find . -type f -name "*.cpp")
+OBJ      = $(SRC:.cpp=.o)
+DEP      = $(OBJ:.o=.d)
+CXXFLAGS = -std=c++11 -Wall -W -pedantic -g # -O3
+CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
+LDFLAGS  = # -L../hello
+LDLIBS   = # -lpthread -lhello
+
+# build shared library
+#OUT       = ../lib/libhello.so
+#CXXFLAGS += -fPIC
+#LDFLAGS  += -shared
+
+$(OUT) : $(OBJ)
+	$(CXX) $(LDFLAGS) $(LDLIBS) $^ -o $@
+
+-include $(DEP)
+
+clean :
+	rm -fr $(OUT) $(OBJ) $(DEP)
+
+.PHONY : clean

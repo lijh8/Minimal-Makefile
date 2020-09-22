@@ -1,15 +1,22 @@
 # Generic Makefile
 #
 # 1. Prerequisites on header files generated
-# 2. Out of source tree build
-# 3. Source files in folders with Makefile or below
+# 2. Source files in folders with Makefile or below
+#
+# .
+# ├── a.c
+# ├── f1.c
+# ├── f1.h
+# ├── f2
+# │   ├── f2.c
+# │   └── f2.h
+# └── Makefile
+#
 
 OUT      = a.out
-DIR      = ./.build
 SRC      = $(shell find . -type f -name "*.c")
-OBJ      = $(addprefix $(DIR)/,$(SRC:.c=.o))
+OBJ      = $(SRC:.c=.o)
 DEP      = $(OBJ:.o=.d)
-
 CFLAGS   = -std=c11 -Wall -W -pedantic -g # -O3
 CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
 LDFLAGS  = # -L../hello
@@ -20,19 +27,12 @@ LDLIBS   = # -lpthread -lhello
 #CFLAGS   += -fPIC
 #LDFLAGS  += -shared
 
-.PHONY : all clean
-
-all : $(OUT)
-
 $(OUT) : $(OBJ)
 	$(CC) $(LDFLAGS) $(LDLIBS) $^ -o $@
-
-$(DIR)/%.o : %.c
-	mkdir -p $(dir $@)
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
 -include $(DEP)
 
 clean :
-	rm -fr $(OUT) $(DIR)
+	rm -fr $(OUT) $(OBJ) $(DEP)
 
+.PHONY : clean
