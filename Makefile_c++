@@ -1,34 +1,33 @@
-# Generic Makefile
-#
+# Makefile
 # 1. Prerequisites on header files generated
-# 2. Source files in folders with Makefile or below
+# 2. Put Makefile at root of Source files directory
 #
 # .
-# ├── main.c
-# ├── f1.c
+# ├── main.cpp
+# ├── f1.cpp
 # ├── f1.h
 # ├── f2
-# │   ├── f2.c
+# │   ├── f2.cpp
 # │   └── f2.h
 # └── Makefile
 #
 
 OUT      = a.out
-SRC      = $(shell find . -type f -name "*.c")
-OBJ      = $(SRC:.c=.o)
+SRC      = $(shell find . -type f -name "*.cpp")
+OBJ      = $(SRC:.cpp=.o)
 DEP      = $(OBJ:.o=.d)
-CFLAGS   = -std=c11 -Wall -W -pedantic -g # -O3
+CXXFLAGS = -std=c++11 -Wall -W -pedantic -g # -O3
 CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
 LDFLAGS  = # -L../hello
 LDLIBS   = # -lpthread -lhello
 
 # build shared library
 #OUT       = ../lib/libhello.so
-#CFLAGS   += -fPIC
+#CXXFLAGS += -fPIC
 #LDFLAGS  += -shared
 
 $(OUT) : $(OBJ)
-	$(CC) $(LDFLAGS) $(LDLIBS) $^ -o $@
+	$(CXX) $(LDFLAGS) $(LDLIBS) $^ -o $@
 
 -include $(DEP)
 
