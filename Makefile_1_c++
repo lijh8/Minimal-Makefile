@@ -1,0 +1,37 @@
+# Makefile
+# 1. Prerequisites on header files generated
+# 2. Put Makefile at root of source file directory
+#
+# .
+# ├── main.cpp
+# ├── f1.cpp
+# ├── f1.h
+# ├── f2
+# │   ├── f2.cpp
+# │   └── f2.h
+# └── Makefile
+#
+
+OUT      = main  # should match basename of one source file
+SRC      = $(shell find . -type f -name "*.cpp")
+OBJ      = $(SRC:.cpp=.o)
+DEP      = $(OBJ:.o=.d)
+CXXFLAGS = -std=c++11 -Wall -W -pedantic -g # -O3
+CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
+LDFLAGS  = -L../hello
+LDLIBS   = -lpthread #-lhello
+CC       = $(CXX)  # assign default linker CC to CXX for C++
+
+# build shared library
+#OUT       = ../lib/libhello.so
+#CXXFLAGS += -fPIC
+#LDFLAGS  += -shared
+
+$(OUT) : $(OBJ)
+
+-include $(DEP)
+
+clean :
+	rm -fr $(OUT) $(OBJ) $(DEP)
+
+.PHONY : clean
