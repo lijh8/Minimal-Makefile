@@ -1,6 +1,7 @@
 # Makefile
 # 1. Prerequisites on header files generated
 # 2. Put Makefile at root of source file directory
+# 3. Compile source files in current directory and subdirs
 #
 # .
 # ├── main.c

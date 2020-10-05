@@ -1,21 +1,19 @@
 # Makefile
 # 1. Prerequisites on header files generated
 # 2. Put Makefile at root of source file directory
+# 3. Compile source files in current directory only (excluding subdirs)
 #
 # .
-# ├── main.c
 # ├── f1.c
 # ├── f1.h
-# ├── f2
-# │   ├── f2.c
-# │   └── f2.h
-# └── Makefile
+# ├── f2.c
+# ├── f2.h
+# ├── main.c
+# ├── Makefile
+# └── print_log.h
 #
 
 OUT      = main  # should match basename of one source file
-SRC      = $(shell find . -type f -name "*.c")
-OBJ      = $(SRC:.c=.o)
-DEP      = $(OBJ:.o=.d)
 CFLAGS   = -std=c11 -Wall -W -pedantic -g # -O3
 CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
 LDFLAGS  = #-L../hello
@@ -26,11 +24,11 @@ LDLIBS   = #-lpthread -lhello
 #CFLAGS   += -fPIC
 #LDFLAGS  += -shared
 
-$(OUT) : $(OBJ)
+$(OUT) : $(patsubst %.c,%.o,$(wildcard *.c))
 
--include $(DEP)
+-include *.d
 
 clean :
-	rm -fr $(OUT) $(OBJ) $(DEP)
+	rm -fr $(OUT) *.o *.d
 
 .PHONY : clean
