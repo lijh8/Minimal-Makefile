@@ -1,7 +1,18 @@
 # Makefile
 # 1. Prerequisites on header files generated
 # 2. Put Makefile at root of source file directory
-# 3. Out of source tree build
+# 3. Compile source files in current directory and subdirs
+# 4. Out of source tree build
+#
+# .
+# ├── main.cpp
+# ├── f1.cpp
+# ├── f1.h
+# ├── f2
+# │   ├── f2.cpp
+# │   └── f2.h
+# └── Makefile
+#
 
 OUT      = a.out
 DIR      = ./.build
