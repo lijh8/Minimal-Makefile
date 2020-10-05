@@ -22,7 +22,7 @@ CC       = $(CXX)  # change linker for C++
 
 # build shared library
 #OUT       = ../lib/libhello.so
-#CFLAGS   += -fPIC
+#CXXFLAGS += -fPIC
 #LDFLAGS  += -shared
 
 $(OUT) : $(patsubst %.cpp,%.o,$(wildcard *.cpp))
