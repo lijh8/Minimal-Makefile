@@ -18,8 +18,8 @@ OBJ      = $(SRC:.c=.o)
 DEP      = $(OBJ:.o=.d)
 CFLAGS   = -std=c11 -Wall -W -pedantic -g # -O3
 CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
-LDFLAGS  = -L../hello
-LDLIBS   = -lpthread #-lhello
+LDFLAGS  = #-L../hello
+LDLIBS   = #-lpthread -lhello
 
 # build shared library
 #OUT       = ../lib/libhello.so

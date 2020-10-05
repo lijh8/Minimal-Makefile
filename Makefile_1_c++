@@ -18,9 +18,9 @@ OBJ      = $(SRC:.cpp=.o)
 DEP      = $(OBJ:.o=.d)
 CXXFLAGS = -std=c++11 -Wall -W -pedantic -g # -O3
 CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
-LDFLAGS  = -L../hello
-LDLIBS   = -lpthread #-lhello
-CC       = $(CXX)  # assign default linker CC to CXX for C++
+LDFLAGS  = #-L../hello
+LDLIBS   = #-lpthread -lhello
+CC       = $(CXX)  # change linker for C++
 
 # build shared library
 #OUT       = ../lib/libhello.so
