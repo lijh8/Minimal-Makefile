@@ -1,7 +1,6 @@
 # Makefile
 # 1. Prerequisites on header files generated
-# 2. Put Makefile at root of source file directory
-# 3. Compile source files in current directory only (excluding subdirs)
+# 2. Compile source files in current directory only (excluding subdirs)
 #
 # .
 # ├── f1.cpp
@@ -14,7 +13,7 @@
 #
 
 OUT      = main  # should match basename of one source file
-CFLAGS   = -std=c11 -Wall -W -pedantic -g # -O3
+CXXFLAGS = -std=c++11 -Wall -W -pedantic -g # -O3
 CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
 LDFLAGS  = #-L../hello
 LDLIBS   = #-lpthread -lhello
