@@ -20,7 +20,6 @@ LDLIBS   = #-lpthread -lhello
 CC       = $(CXX)  # change linker for C++
 
 # build shared library
-#OUT       = ../lib/libhello.so
 #CXXFLAGS += -fPIC
 #LDFLAGS  += -shared
 

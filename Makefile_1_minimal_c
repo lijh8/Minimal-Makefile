@@ -19,7 +19,6 @@ LDFLAGS  = #-L../hello
 LDLIBS   = #-lpthread -lhello
 
 # build shared library
-#OUT       = ../lib/libhello.so
 #CFLAGS   += -fPIC
 #LDFLAGS  += -shared
 
