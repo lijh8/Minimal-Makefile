@@ -13,7 +13,6 @@
 # └── print_log.h
 #
 
-OUT      = main  # should match basename of one source file
 CXXFLAGS = -std=c++11 -Wall -W -pedantic -g # -O3
 CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
 LDFLAGS  = #-L../hello
@@ -25,11 +24,12 @@ CC       = $(CXX)  # change linker for C++
 #CXXFLAGS += -fPIC
 #LDFLAGS  += -shared
 
-$(OUT) : $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+# target should match basename of one source file
+main : $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
 -include *.d
 
 clean :
-	rm -fr $(OUT) *.o *.d
+	rm -fr *.o *.d
 
 .PHONY : clean
