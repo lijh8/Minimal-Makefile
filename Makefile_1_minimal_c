@@ -1,7 +1,7 @@
 # Makefile
-# 1. Prerequisites on header files generated
-# 2. Compile source files in current directory only (excluding subdirs)
-# 3. Minimal Makefile
+# 1. Minimal Makefile
+# 2. Generating Prerequisites Automatically for header files
+# 3. Automatically compile source files in current directory only (excluding subdirs)
 #
 # .
 # ├── f1.c
