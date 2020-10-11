@@ -16,9 +16,9 @@
 # build shared library with -fPIC, -shared
 CFLAGS   = -std=c11   -Wall -W -pedantic -g # -fPIC
 CXXFLAGS = -std=c++11 -Wall -W -pedantic -g # -fPIC
-CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
-LDFLAGS  = #-L../hello                    # -shared
+LDFLAGS  = #-L../hello                   # -shared
 LDLIBS   = #-lpthread -lhello
+CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
 #CC      = $(CXX)  # change linker for .cpp
 
 # target should match basename of one source file
