@@ -1,0 +1,28 @@
+# Makefile
+# 1. Minimal Makefile
+# 2. Generating Prerequisites Automatically for header files
+# 3. Automatically compile source files in current directory only (excluding subdirs)
+#
+# .
+# ├── f1.c
+# ├── f1.h
+# ├── f2.c
+# ├── f2.h
+# ├── main.c
+# ├── Makefile
+# └── print_log.h
+#
+
+# build shared library with -fPIC, -shared
+CFLAGS   = -std=c11   -Wall -W -pedantic -g # -fPIC
+CXXFLAGS = -std=c++11 -Wall -W -pedantic -g # -fPIC
+CPPFLAGS = -MMD -MP -DNDEBUG -I../hello
+LDFLAGS  = #-L../hello                    # -shared
+LDLIBS   = #-lpthread -lhello
+#CC      = $(CXX)  # change linker for .cpp
+
+# target should match basename of one source file
+main : $(patsubst %.c,%.o,$(wildcard *.c))  # .cpp
+-include *.d
+clean : ; -rm -fr *.o *.d
+.PHONY : clean
