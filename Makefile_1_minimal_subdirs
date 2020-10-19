@@ -1,0 +1,26 @@
+# Makefile
+# .
+# ├── f1.c
+# ├── f1.h
+# ├── f2
+# │   ├── f22
+# │   │   ├── f22.c
+# │   │   └── f22.h
+# │   ├── f2.c
+# │   └── f2.h
+# ├── main.c
+# ├── Makefile
+# └── print_log.h
+
+# build shared library with -fPIC, -shared
+CFLAGS   = -g # -O3 # -fPIC # CXXFLAGS
+LDFLAGS  = # -L../hello # -shared
+LDLIBS   = # -lpthread # -lhello
+CPPFLAGS = -MMD -MP # -DNDEBUG # -I../hello
+#CC      = $(CXX)  # change linker for .cpp
+
+# target should match basename of one source file
+main : $(patsubst %.c,%.o,$(shell find . -type f -name "*.c"))  # .cpp
+-include $(shell find . -type f -name "*.d")
+clean : ; -rm -fr `find . -type f -name "*.o" -o -name "*.d"`
+.PHONY : clean
