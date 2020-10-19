@@ -1,4 +1,19 @@
 # Makefile
+# 1. Generating Prerequisites Automatically for header files
+# 2. Automatically compile source files in current directory only
+#
+# .
+# ├── f1.c
+# ├── f1.h
+# │── f2.c
+# │── f2.h
+# ├── main.c
+# ├── Makefile
+# └── print_log.h
+#
+
+# C   code :  .c    %.c    *.c    CC   CFLAGS
+# C++ code :  .cpp  %.cpp  *.cpp  CXX  CXXFLAGS
 
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 # -fPIC # CXXFLAGS
