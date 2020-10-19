@@ -25,8 +25,8 @@ SRC      = $(shell find . -type f -name "*.c")  # .cpp
 
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 # -fPIC # CXXFLAGS
-LDFLAGS  = -L../hello # -shared
-LDLIBS   = -lpthread # -lhello
+LDFLAGS  = # -L../hello # -shared
+LDLIBS   = # -lpthread # -lhello
 CPPFLAGS = -MMD -MP # -DNDEBUG # -I../hello
 
 main : $(addprefix $(DIR)/,$(SRC:.c=.o))  # .cpp
