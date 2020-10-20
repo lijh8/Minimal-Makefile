@@ -2,26 +2,19 @@
 # $ make
 # $ make clean
 # Issue make commands with this outer Makefile.
-# It then calls the inner Makefile.
+# It then calls inner Makefile(s).
 #
-
 # myproject
 # ├── hello1
 # │   ├── f1.c
 # │   ├── f1.h
-# │   │── f2.c
-# │   │── f2.h
 # │   ├── main.c
-# │   ├── Makefile  # inner Makefile
-# │   └── print_log.h
+# │   └── Makefile  # inner Makefile
 # ├── hello2
-# │   ├── f1.c
-# │   ├── f1.h
-# │   │── f2.c
-# │   │── f2.h
+# │   ├── f2.c
+# │   ├── f2.h
 # │   ├── main.c
-# │   ├── Makefile  # inner Makefile
-# │   └── print_log.h
+# │   └── Makefile  # inner Makefile
 # └── Makefile  # outer Makefile
 #
 
