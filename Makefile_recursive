@@ -1,7 +1,7 @@
 # Makefile
 # make
 # make clean
-# Issue make command with the this outer Makefile.
+# Issue make commands with the this outer Makefile.
 # It then calls the inner Makefile
 #
 
