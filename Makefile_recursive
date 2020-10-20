@@ -1,0 +1,12 @@
+# Makefile
+# Calls the actual Makefile in lower directory
+
+all :
+	$(MAKE) -C hello2
+	$(MAKE) -C hello3
+
+clean :
+	$(MAKE) -C hello2 clean
+	$(MAKE) -C hello3 clean
+
+.PHONY : clean
