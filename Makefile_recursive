@@ -1,12 +1,36 @@
 # Makefile
 # Calls the actual Makefile in lower directory
+#
+# myproject
+# ├── hello1
+# │   ├── f1.c
+# │   ├── f1.h
+# │   │── f2.c
+# │   │── f2.h
+# │   ├── main.c
+# │   ├── Makefile  # actual Makefile
+# │   └── print_log.h
+# ├── hello2
+# │   ├── f1.c
+# │   ├── f1.h
+# │   │── f2.c
+# │   │── f2.h
+# │   ├── main.c
+# │   ├── Makefile  # actual Makefile
+# │   └── print_log.h
+# └── Makefile  # outer Makefile
+#
+# Issue make command in directory with the outer Makefile:
+# $ make
+# $ make clean
+#
 
 all :
+	$(MAKE) -C hello1
 	$(MAKE) -C hello2
-	$(MAKE) -C hello3
 
 clean :
+	$(MAKE) -C hello1 clean
 	$(MAKE) -C hello2 clean
-	$(MAKE) -C hello3 clean
 
 .PHONY : all clean
