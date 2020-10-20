@@ -1,6 +1,10 @@
 # Makefile
-# Calls the inner Makefile
+# make
+# make clean
+# Issue make command with the this outer Makefile.
+# It then calls the inner Makefile
 #
+
 # myproject
 # ├── hello1
 # │   ├── f1.c
@@ -19,10 +23,6 @@
 # │   ├── Makefile  # inner Makefile
 # │   └── print_log.h
 # └── Makefile  # outer Makefile
-#
-# Issue make command with the outer Makefile:
-# $ make
-# $ make clean
 #
 
 all :
