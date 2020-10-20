@@ -33,7 +33,7 @@ main : $(addprefix $(DIR)/,$(SRC:.c=.o))  # .cpp
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@  # CXX
 
 $(DIR)/%.o : %.c  # .cpp
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<  # CXX CXXFLAGS
 
 -include $(shell find . -type f -name "*.d")
