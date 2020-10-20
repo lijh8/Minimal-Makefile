@@ -9,4 +9,4 @@ clean :
 	$(MAKE) -C hello2 clean
 	$(MAKE) -C hello3 clean
 
-.PHONY : clean
+.PHONY : all clean
