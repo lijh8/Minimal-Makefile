@@ -1,0 +1,44 @@
+# Makefile
+# 1. Generating Prerequisites Automatically for header files
+# 2. Automatically compile source files in current directory and subdirs
+# 3. Out of source tree build
+#
+# .
+# ├── f1.c
+# ├── f1.h
+# ├── f2.c
+# ├── f2.h
+# ├── main1.c
+# ├── main2.c
+# ├── Makefile
+# └── print_log.h#
+#
+
+# C   code :  .c    %.c    *.c    CC   CFLAGS
+# C++ code :  .cpp  %.cpp  *.cpp  CXX  CXXFLAGS
+
+DIR      = ./.build
+SRC1     = main1.c f1.c  # .cpp
+SRC2     = main2.c f2.c  # .cpp
+
+# build shared library with -fPIC, -shared
+CFLAGS   = -g # -O3 # -fPIC # CXXFLAGS
+LDFLAGS  = # -L../hello # -shared
+LDLIBS   = # -lpthread # -lhello
+CPPFLAGS = -MMD -MP # -DNDEBUG # -I../hello
+
+all : $(DIR)/main1 $(DIR)/main2
+
+$(DIR)/main1 : $(addprefix $(DIR)/,$(SRC1:.c=.o))  # .cpp
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@  # CXX
+
+$(DIR)/main2 : $(addprefix $(DIR)/,$(SRC2:.c=.o))  # .cpp
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@  # CXX
+
+$(DIR)/%.o : %.c  # .cpp
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<  # CXX CXXFLAGS
+
+-include $(shell find . -type f -name "*.d")
+clean : ; -rm -fr $(DIR)
+.PHONY : all clean
