@@ -29,7 +29,7 @@ LDFLAGS  = # -L../hello # -shared
 LDLIBS   = # -lpthread # -lhello
 CPPFLAGS = -MMD -MP # -DNDEBUG # -I../hello
 
-main : $(addprefix $(DIR)/,$(SRC:.c=.o))  # .cpp
+$(DIR)/main : $(addprefix $(DIR)/,$(SRC:.c=.o))  # .cpp
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@  # CXX
 
 $(DIR)/%.o : %.c  # .cpp
