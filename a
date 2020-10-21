@@ -2,21 +2,16 @@
 # 1. Generating Prerequisites Automatically for header files
 # 2. Automatically compile source files in current directory and subdirs
 # 3. Out of source tree build
-# 4. Generate multiple binary targets using linker
 #
 # .
 # ├── f1.c
 # ├── f1.h
-# ├── f2
-# │   ├── f22
-# │   │   ├── f22.c
-# │   │   └── f22.h
-# │   ├── f2.c
-# │   └── f2.h
+# ├── f2.c
+# ├── f2.h
 # ├── main1.c
 # ├── main2.c
 # ├── Makefile
-# └── print_log.h
+# └── print_log.h#
 #
 
 # C   code :  .c    %.c    *.c    CC   CFLAGS
