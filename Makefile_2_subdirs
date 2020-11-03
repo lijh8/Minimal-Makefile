@@ -26,7 +26,7 @@ LDLIBS   = # -lpthread # -lhello
 CPPFLAGS = -MMD -MP # -DNDEBUG # -I../hello
 #CC      = $(CXX)  # change linker for .cpp
 
-# target should match basename of one source file
+# target should be basename of one source file
 main : $(patsubst %.c,%.o,$(shell find . -type f -name "*.c"))  # .cpp
 -include $(shell find . -type f -name "*.d")
 clean : ; -rm -fr `find . -type f -name "*.o" -o -name "*.d"`
