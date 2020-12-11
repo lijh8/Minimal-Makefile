@@ -1,7 +1,8 @@
 # Makefile
-# 1. Generating Prerequisites Automatically for header files
-# 2. Automatically compile source files in current directory and subdirs
-#
+
+# 1. Generating prerequisites automatically for header files
+# 2. Compile source files automatically in current directory tree
+
 # .
 # ├── f1.c
 # ├── f1.h
@@ -14,19 +15,15 @@
 # ├── main.c
 # ├── Makefile
 # └── print_log.h
-#
-
-# C   code :  .c    %.c    *.c    CC   CFLAGS
-# C++ code :  .cpp  %.cpp  *.cpp  CXX  CXXFLAGS
 
 # build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 # -fPIC # CXXFLAGS
+CFLAGS   = -g # -O3 # -fPIC  # CXXFLAGS for .cpp
 LDFLAGS  = # -L../hello # -shared
-LDLIBS   = # -lpthread # -lhello
-CPPFLAGS = -MMD -MP # -DNDEBUG # -I../hello
-#CC      = $(CXX)  # change linker for .cpp
+LDLIBS   = # -lhello
+CPPFLAGS = -MMD -MP  # -I../hello
+#CC      = $(CXX)  # uncomment to use CXX linker for .cpp
 
-# target should be basename of one source file
+# target name should be basename of one source file
 main : $(patsubst %.c,%.o,$(shell find . -type f -name "*.c"))  # .cpp
 -include $(shell find . -type f -name "*.d")
 clean : ; -rm -fr `find . -type f -name "*.o" -o -name "*.d"`
