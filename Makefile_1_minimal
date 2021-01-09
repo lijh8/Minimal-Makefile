@@ -13,7 +13,7 @@
 # └── print_log.h
 
 # build shared library with -fPIC, -shared
-CFLAGS   = -g # -fPIC  # CXXFLAGS for .cpp
+CFLAGS   = -g # -O3 # -fPIC  # CXXFLAGS for .cpp
 LDFLAGS  = # -L../hello # -shared
 LDLIBS   = # -lhello
 CPPFLAGS = -MMD -MP  # -I../hello
