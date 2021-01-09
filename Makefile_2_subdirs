@@ -26,5 +26,5 @@ CPPFLAGS = -MMD -MP  # -I../hello
 # target name should be basename of one of the source files
 main : $(patsubst %.c,%.o,$(shell find . -type f -name "*.c"))  # .cpp
 -include $(shell find . -type f -name "*.d")
-clean : ; -rm -fr `find . -type f -name "*.o" -o -name "*.d"`
+clean : ; -rm -fr $(shell find . -type f -name "*.o" -o -name "*.d")
 .PHONY : clean
