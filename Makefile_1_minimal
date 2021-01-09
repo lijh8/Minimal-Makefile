@@ -13,13 +13,13 @@
 # └── print_log.h
 
 # build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 # -fPIC  # CXXFLAGS for .cpp
+CFLAGS   = -g # -fPIC  # CXXFLAGS for .cpp
 LDFLAGS  = # -L../hello # -shared
 LDLIBS   = # -lhello
 CPPFLAGS = -MMD -MP  # -I../hello
-#CC      = $(CXX)  # uncomment to use CXX linker for .cpp
+#CC      = $(CXX)  # link with CXX for .cpp
 
-# target name should be basename of one source file
+# target name should be basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c))  # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d
