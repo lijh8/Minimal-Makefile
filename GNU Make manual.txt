@@ -22,7 +22,6 @@ write explicit rules for compiling the files)
 use the ‘-MM’ flag
 Options Controlling the Preprocessor
 
-
 10.1 Using Implicit Rules
 Because you mention foo.o but do not give a rule for it,
 make will automatically look for an implicit rule that tells how to update it.
