@@ -25,9 +25,8 @@ use the ‘-MM’ flag
 To allow make to find a customary method for updating a target file, all you have to do is
 refrain from specifying recipes yourself. Either write a rule with no recipe, or don’t write
 a rule at all. Then make will figure out which implicit rule to use based on which kind of
-source file exists or can be made.
+source file exists or can be made. For example, suppose the makefile looks like this:
 
-For example, suppose the makefile looks like this:
     foo : foo.o bar.o
         cc -o foo foo.o bar.o $(CFLAGS) $(LDFLAGS)
 
