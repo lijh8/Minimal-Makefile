@@ -23,8 +23,18 @@ use the ‘-MM’ flag
 Options Controlling the Preprocessor
 
 10.1 Using Implicit Rules
-Because you mention foo.o but do not give a rule for it,
-make will automatically look for an implicit rule that tells how to update it.
+To allow make to find a customary method for updating a target file, all you have to do is
+refrain from specifying recipes yourself. Either write a rule with no recipe, or don’t write
+a rule at all. Then make will figure out which implicit rule to use based on which kind of
+source file exists or can be made.
+For example, suppose the makefile looks like this:
+
+    foo : foo.o bar.o
+        cc -o foo foo.o bar.o $(CFLAGS) $(LDFLAGS)
+
+Because you mention foo.o but do not give a rule for it, make will automatically look for
+an implicit rule that tells how to update it. This happens whether or not the file foo.o
+currently exists.
 
 10.2 Catalogue of Built-In Rules
 
@@ -34,6 +44,6 @@ Compiling C programs:
 Compiling C++ programs:
     $(CXX) $(CPPFLAGS) $(CXXFLAGS) -c
 
-Linking a single object file: (if there are multiple object files,
-one of which has a name matching that of the executable file)
+Linking a single object file:
     $(CC) $(LDFLAGS) n.o $(LOADLIBES) $(LDLIBS)
+(if there are multiple object files, one of which has a name matching that of the executable file)
