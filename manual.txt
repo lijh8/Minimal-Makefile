@@ -36,7 +36,6 @@ look for an implicit rule that tells how to update it. This happens whether or
 not the file foo.o currently exists.
 
 10.2 Catalogue of Built-In Rules
-
 Compiling C programs:
     $(CC) $(CPPFLAGS) $(CFLAGS) -c
 
