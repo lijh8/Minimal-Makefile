@@ -1,0 +1,54 @@
+# Makefile:
+
+# build shared library with -fPIC, -shared
+CFLAGS   = # -g # -O3 # -fPIC  # CXXFLAGS for .cpp
+LDFLAGS  = # -L../hello # -shared
+LDLIBS   = # -lhello
+CPPFLAGS = -MMD -MP # -I../hello
+#CC      = $(CXX)  # link with CXX for .cpp
+
+all: main
+
+# assert() works with NDEBUG too
+ifdef NDEBUG
+CFLAGS += -O3 -DNDEBUG
+else
+CFLAGS += -g
+endif
+
+# target name is basename of one of the source files
+main : $(patsubst %.c,%.o,$(wildcard *.c))  # .cpp
+-include *.d
+clean : ; -rm -fr *.o *.d
+.PHONY : clean
+
+----
+
+//main.c
+
+#include <stdio.h>
+#include <assert.h>
+#include "hello.h"
+
+int main(){
+#ifndef NDEBUG
+    printf("no def\n");
+#else
+    printf("yes def\n");
+#endif
+    int i = 0;
+    assert(i);
+    hello();
+}
+
+----
+
+$ make NDEBUG=1
+cc -O3 -DNDEBUG -MMD -MP   -c -o main.o main.c
+cc   main.o hello.o   -o main
+$
+
+$ make
+cc -g -MMD -MP   -c -o main.o main.c
+cc   main.o hello.o   -o main
+$
