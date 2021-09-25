@@ -9,6 +9,16 @@ CPPFLAGS = -MMD -MP # -I../hello
 
 all: main
 
+# $ make NDEBUG=1
+# cc -O3 -DNDEBUG -MMD -MP   -c -o main.o main.c
+# cc   main.o hello.o   -o main
+# $
+
+# $ make
+# cc -g -MMD -MP   -c -o main.o main.c
+# cc   main.o hello.o   -o main
+# $
+
 # assert() works with NDEBUG too
 ifdef NDEBUG
 CFLAGS += -O3 -DNDEBUG
