@@ -1,0 +1,72 @@
+//autotools automake autoconf makefile
+
+// Alexandre Duret-Lutz
+// Handout version in PDF
+//   (4 slides per pages without animations, for printing)
+// autotools-handout-4.pdf
+
+https://www.lrde.epita.fr/~adl/autotools.html
+
+---
+
+$ autoscan
+
+$ mv configure.scan configure.ac
+
+## root dir
+$ vi configure.ac
+AC_CONFIG_FILES([Makefile src/Makefile])
+$
+
+## root dir
+$ vi Makefile
+SUBDIRS = src
+$
+
+## subdir
+$ vi src/Makefile
+hello SOURCES = main.c
+$
+
+## to generate ./configure
+## or put this command in file named: autogen.sh
+$ autoreconf -i
+aclocal: warning: couldn't open directory 'm4': No such file or directory
+$
+
+## mkdir m4  # or ignore the warning: couldn't open directory 'm4'
+
+$ ./configure  # to generate Makefile
+
+$ make
+
+$ make DESTDIR=$HOME/inst install
+
+$ cd ~/inst
+
+$ tar zcvf ~/amhello-1.0-i686.tar.gz .
+
+... and ~/amhello-1.0-i686.tar.gz is ready to be uncompressed in / on any hosts
+
+---
+
+$ ls ./lib/.libs
+libhello.a  libhello.la  libhello.lai  libhello.so  say.o
+$
+
+---
+
+AC_PROG_CC
+AC_PROG_CXX
+AC_LANG(C)
+AC_LANG(C++)
+
+---
+
+ubuntu linux:
+
+$ apt install build-essential
+
+$ apt install git automake autoconf libtool pkg-config gettext perl flex bison gperf
+
+---
