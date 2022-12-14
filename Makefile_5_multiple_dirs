@@ -11,4 +11,4 @@ clean :
 main : hello
 hello :
 	make -C $@
-	cp hello/hello hello/libhello.dylib
+	cp hello/hello hello/libhello.so
