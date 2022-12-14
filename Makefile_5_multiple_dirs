@@ -1,61 +1,14 @@
-$ cd src
-$ find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
-.
-|____hello
-| |____hello.h
-| |____Makefile
-| |____hello.c
-|____main
-| |____main.c
-| |____Makefile
-|____Makefile
-$ 
-
-$ cat src/Makefile 
 SUBDIRS = hello main
 subdirs : $(SUBDIRS)
-.PHONY : subdirs $(SUBDIRS)
-main : hello
-
 $(SUBDIRS) :
 	make -C $@
+clean :
+	for dir in $(SUBDIRS); do \
+		make -C $$dir $@; \
+	done
+.PHONY : $(SUBDIRS) subdirs clean
+
+main : hello
 hello :
 	make -C $@
-	cp hello/hello hello/libhello.so
-$ 
-
-$ cat main/Makefile
-# build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-LDFLAGS  = -L../hello -Wl,-rpath,../hello # -shared
-LDLIBS   = -lhello
-CPPFLAGS = -MMD -MP -I../hello
-#CC      = $(CXX) # link with CXX for .cpp
-
-# target name is basename of one of the source files
-main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
-clean : ; -rm -fr *.o *.d
-.PHONY : clean
-$
-
-$ make
-Makefile:9: warning: overriding recipe for target 'hello'
-Makefile:7: warning: ignoring old recipe for target 'hello'
-make -C hello
-make[1]: Entering directory '/home/ljh/Documents/hello_c/src/hello'
-cc -fPIC -g  -MMD -MP   -c -o hello.o hello.c
-cc -shared   hello.o   -o hello
-make[1]: Leaving directory '/home/ljh/Documents/hello_c/src/hello'
-cp hello/hello hello/libhello.so
-make -C main
-make[1]: Entering directory '/home/ljh/Documents/hello_c/src/main'
-cc -g  -MMD -MP -I../hello  -c -o main.o main.c
-cc -L../hello -Wl,-rpath,../hello   main.o  -lhello -o main
-make[1]: Leaving directory '/home/ljh/Documents/hello_c/src/main'
-$ 
-
-$ cd main
-$ ldd main
-	libhello.so => ../hello/libhello.so
-$
+	cp hello/hello hello/libhello.dylib
