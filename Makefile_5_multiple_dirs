@@ -13,9 +13,9 @@ $
 
 $ cat src/Makefile 
 SUBDIRS = hello main
-subdirs: $(SUBDIRS)
+subdirs : $(SUBDIRS)
 .PHONY : subdirs $(SUBDIRS)
-main: hello
+main : hello
 
 $(SUBDIRS) :
 	make -C $@
