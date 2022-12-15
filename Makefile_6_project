@@ -1,6 +1,6 @@
 $ cd myproject
 $ ls
-Makefile  hello    main
+Makefile  hello  main
 $
 $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 .
@@ -78,7 +78,7 @@ CPPFLAGS = -MMD -MP -I../hello
 #CC      = $(CXX) # link with CXX for .cpp
 
 # linking to .so or .dylib
-#LDFLAGS += -shared -Wl,-rpath,../hello
+#LDFLAGS += -Wl,-rpath,../hello
 
 # target name is basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
