@@ -1,0 +1,97 @@
+$ cd myproject
+$ ls
+Makefile  hello    main
+$ 
+$ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'      
+.
+|____Makefile
+|____hello
+| |____Makefile
+| |____hello.cpp
+| |____hello.h
+|____main
+| |____Makefile
+| |____main.cpp
+$ 
+$ 
+$ cat Makefile 
+SUBDIRS = hello main
+subdirs : $(SUBDIRS)
+$(SUBDIRS) :
+  make -C $@
+clean :
+  for dir in $(SUBDIRS); do \
+    make -C $$dir $@; \
+  done
+.PHONY : $(SUBDIRS) subdirs clean
+
+main : hello
+hello :
+  make -C $@
+  cp hello/hello hello/libhello.so
+  # cp hello/hello hello/libhello.dylib # macOS
+$ 
+$ 
+$ cat hello/Makefile 
+# build shared library with -fPIC, -shared
+CXXFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
+LDFLAGS  = -shared # -L./hello -Wl,-rpath,./hello # -shared
+LDLIBS   = # -lhello
+CPPFLAGS = -MMD -MP # -I./hello
+CC      = $(CXX) # link with CXX for .cpp
+# LDFLAGS += -install_name @rpath/hello # macOS
+
+# target name is basename of one of the source files
+hello : $(patsubst %.cpp,%.o,$(wildcard *.cpp)) # .cpp
+-include *.d
+clean : ; -rm -fr *.o *.d
+.PHONY : clean
+$ 
+$ 
+$ cat hello/hello.cpp 
+#include <stdio.h>
+#include "hello.h"
+
+void hello()
+{
+  printf("hello\n");
+}
+$ 
+$ 
+$ cat hello/hello.h  
+#ifndef _hello_
+#define _hello_
+
+void hello();
+
+#endif
+$ 
+$ 
+$ cat main/Makefile 
+# build shared library with -fPIC, -shared
+CXXFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
+LDFLAGS  = -L../hello -Wl,-rpath,../hello # -shared
+LDLIBS   = -lhello
+CPPFLAGS = -MMD -MP -I../hello
+CC      = $(CXX) # link with CXX for .cpp
+
+# target name is basename of one of the source files
+main : $(patsubst %.cpp,%.o,$(wildcard *.cpp)) # .cpp
+-include *.d
+clean : ; -rm -fr *.o *.d
+.PHONY : clean
+$ 
+$ 
+$ cat main/main.cpp 
+#include <stdio.h>
+#include "hello.h"
+
+int main()
+{
+  printf("main\n");
+
+  //Linux:needs LD_LIBRARY_PATH to trace breakpoint in shared object .so
+  //macOS:needs rpath to trace breakpoint in dynamic library .dylib
+  hello();
+}
+$ 
