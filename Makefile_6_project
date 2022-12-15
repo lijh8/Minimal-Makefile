@@ -90,8 +90,12 @@ int main()
 {
   printf("main\n");
 
-  //Linux:needs LD_LIBRARY_PATH to trace breakpoint in shared object .so
-  //macOS:needs rpath to trace breakpoint in dynamic library .dylib
+  //Linux: LD_LIBRARY_PATH is enough to trace breakpoint 
+  //  in shared object .so
+
+  //macOS: needs rpath to trace breakpoint 
+  //  in dynamic library .dylib
+
   hello();
 }
 $ 
