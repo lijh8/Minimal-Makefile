@@ -1,5 +1,3 @@
-C and C++ project with Makefile
-
 $ cd myproject
 $ ls
 Makefile  hello    main
@@ -30,18 +28,20 @@ clean :
 main : hello
 hello :
   make -C $@
-  cp hello/hello hello/libhello.so
+  cp hello/hello hello/libhello.so # Linux
   # cp hello/hello hello/libhello.dylib # macOS
 $
 $
 $ cat hello/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
-LDFLAGS  = # -L./hello # -shared
+LDFLAGS  = -shared # -L./hello
 LDLIBS   = # -lhello
 CPPFLAGS = -MMD -MP # -I./hello
 #CC      = $(CXX) # link with CXX for .cpp
-#LDFLAGS += -install_name @rpath/hello # building .dylib, macOS
+
+# building .dylib, macOS
+#LDFLAGS += -install_name @rpath/hello
 
 # target name is basename of one of the source files
 hello : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
@@ -76,7 +76,9 @@ LDFLAGS  = -L../hello # -shared
 LDLIBS   = -lhello
 CPPFLAGS = -MMD -MP -I../hello
 #CC      = $(CXX) # link with CXX for .cpp
-#LDFLAGS += -shared -Wl,-rpath,../hello # linking to .so or .dylib
+
+# linking to .so or .dylib
+#LDFLAGS += -shared -Wl,-rpath,../hello
 
 # target name is basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
@@ -96,8 +98,8 @@ int main()
   //Linux: LD_LIBRARY_PATH is enough for gdb debugger to
   //  trace breakpoint in shared object .so
 
-  //macOS: needs rpath for lldb debugger to
-  //  trace breakpoint in dynamic library .dylib
+  //macOS: lldb does not recognize DYLD_LIBRARY_PATH. rpath is needed
+  //  for lldb debugger to trace breakpoint in dynamic library .dylib
 
   hello();
 }
