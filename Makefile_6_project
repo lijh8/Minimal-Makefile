@@ -1,20 +1,22 @@
+C and C++ project with Makefile
+
 $ cd myproject
 $ ls
 Makefile  hello    main
-$ 
-$ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'      
+$
+$ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 .
 |____Makefile
 |____hello
 | |____Makefile
-| |____hello.cpp
+| |____hello.c
 | |____hello.h
 |____main
 | |____Makefile
-| |____main.cpp
-$ 
-$ 
-$ cat Makefile 
+| |____main.c
+$
+$
+$ cat Makefile
 SUBDIRS = hello main
 subdirs : $(SUBDIRS)
 $(SUBDIRS) :
@@ -30,25 +32,25 @@ hello :
   make -C $@
   cp hello/hello hello/libhello.so
   # cp hello/hello hello/libhello.dylib # macOS
-$ 
-$ 
-$ cat hello/Makefile 
+$
+$
+$ cat hello/Makefile
 # build shared library with -fPIC, -shared
-CXXFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
-LDFLAGS  = -shared # -L./hello -Wl,-rpath,./hello # -shared
+CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
+LDFLAGS  = # -L./hello # -shared
 LDLIBS   = # -lhello
 CPPFLAGS = -MMD -MP # -I./hello
-CC      = $(CXX) # link with CXX for .cpp
-# LDFLAGS += -install_name @rpath/hello # macOS
+#CC      = $(CXX) # link with CXX for .cpp
+#LDFLAGS += -install_name @rpath/hello # building .dylib, macOS
 
 # target name is basename of one of the source files
-hello : $(patsubst %.cpp,%.o,$(wildcard *.cpp)) # .cpp
+hello : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d
 .PHONY : clean
-$ 
-$ 
-$ cat hello/hello.cpp 
+$
+$
+$ cat hello/hello.c
 #include <stdio.h>
 #include "hello.h"
 
@@ -56,33 +58,34 @@ void hello()
 {
   printf("hello\n");
 }
-$ 
-$ 
-$ cat hello/hello.h  
+$
+$
+$ cat hello/hello.h
 #ifndef _hello_
 #define _hello_
 
 void hello();
 
 #endif
-$ 
-$ 
-$ cat main/Makefile 
+$
+$
+$ cat main/Makefile
 # build shared library with -fPIC, -shared
-CXXFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-LDFLAGS  = -L../hello -Wl,-rpath,../hello # -shared
+CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
+LDFLAGS  = -L../hello # -shared
 LDLIBS   = -lhello
 CPPFLAGS = -MMD -MP -I../hello
-CC      = $(CXX) # link with CXX for .cpp
+#CC      = $(CXX) # link with CXX for .cpp
+#LDFLAGS += -shared -Wl,-rpath,../hello # linking to .so or .dylib
 
 # target name is basename of one of the source files
-main : $(patsubst %.cpp,%.o,$(wildcard *.cpp)) # .cpp
+main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d
 .PHONY : clean
-$ 
-$ 
-$ cat main/main.cpp 
+$
+$
+$ cat main/main.c
 #include <stdio.h>
 #include "hello.h"
 
@@ -90,13 +93,12 @@ int main()
 {
   printf("main\n");
 
-  //Linux: LD_LIBRARY_PATH is enough to trace breakpoint 
-  //  in shared object .so
+  //Linux: LD_LIBRARY_PATH is enough for gdb debugger to
+  //  trace breakpoint in shared object .so
 
-  //macOS: needs rpath to trace breakpoint 
-  //  in dynamic library .dylib
+  //macOS: needs rpath for lldb debugger to
+  //  trace breakpoint in dynamic library .dylib
 
   hello();
 }
-$ 
 $
