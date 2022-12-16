@@ -14,10 +14,11 @@
 
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-LDFLAGS  = # -L./hello -shared
-LDLIBS   = # -lhello
-CPPFLAGS = -MMD -MP # -I./hello
+LDFLAGS  = # -L../foo -Wl,-rpath,../foo # -shared 
+LDLIBS   = # -lfoo
+CPPFLAGS = -MMD -MP # -I../foo
 #CC      = $(CXX) # link with CXX for .cpp
+#LDFLAGS += -install_name @rpath/foo # macOS .dylib
 
 # target name is basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
