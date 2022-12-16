@@ -19,11 +19,12 @@
 
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 # -fPIC  # CXXFLAGS for .cpp
-LDFLAGS  = # -L../hello # -shared
+LDFLAGS  = # -L../foo -Wl,-rpath,../foo # -shared
 LDLIBS   = # -lhello
 CPPFLAGS = -MMD -MP # -I../hello
 DIR      = ./.build
 SRC      = $(shell find . -type f -name "*.c")  # .cpp
+#LDFLAGS += -install_name @rpath/foo # macOS .dylib
 
 $(DIR)/main : $(addprefix $(DIR)/,$(SRC:.c=.o))  # .cpp
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@  # CXX for .cpp
