@@ -95,12 +95,8 @@ int main()
 {
   printf("main\n");
 
-  //Linux: LD_LIBRARY_PATH is enough for gdb debugger to
-  //  trace breakpoint in shared object .so
-
-  //macOS: lldb does not recognize DYLD_LIBRARY_PATH. rpath is needed
-  //  for lldb debugger to trace breakpoint in dynamic library .dylib
-
+  //lldb needs rpath to debug .dylib on macOS.
+  //The debugger does not use DYLD_LIBRARY_PATH.
   hello();
 }
 $
