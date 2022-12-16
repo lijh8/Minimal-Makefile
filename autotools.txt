@@ -1,50 +1,90 @@
-```
-Autotools Tutorial, Alexandre Duret-Lutz
+Alexandre Duret-Lutz
+Autotools Tutorial, Handout version in PDF
+(4 slides per pages without animations, for printing)
 https://www.lrde.epita.fr/~adl/autotools.html
-Handout version in PDF (4 slides per pages without animations, for printing)
 https://www.lrde.epita.fr/~adl/dl/autotools-handout-4.pdf
 
-$ apt install build-essential git perl flex bison
-$ apt install automake autoconf libtool pkg-config gettext gperf
+$ cd hello
+$ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+.
+|____foo
+| |____foo.h
+| |____Makefile.am
+| |____foo.c
+|____main
+| |____main.c
+| |____Makefile.am
+|____Makefile.am
+|____autogen.sh
+|____configure.ac
+$
 
+$ apt install build-essential git perl flex bison gperf
+$ apt install automake autoconf libtool pkg-config gettext
+$
 $ autoscan
 $ mv configure.scan configure.ac
 $ vi configure.ac
+
+AC_PREREQ([2.71])
+AC_INIT([PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDR])
+
+AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_MACRO_DIRS([m4])
-AC_PROG_CC # CXX
-AC_LANG(C) # C++
-AC_PROG_CPP
+AM_PROG_AR
 LT_INIT
-AC_CONFIG_FILES([Makefile src/Makefile])
+
+AC_PROG_CC # CXX
+
+# put Makefile in dependency directory first
+AC_CONFIG_FILES([Makefile foo/Makefile main/Makefile])
+
 AC_OUTPUT
 $
-$ vi Makefile
-SUBDIRS = src lib
+$ cat Makefile.am
 ACLOCAL_AMFLAGS = -I m4
+# put dependency directory first
+SUBDIRS = foo main
 $
-$ vi src/Makefile
-bin_PROGRAMS = hello
-hello_SOURCES = main.c
-hello_CPPFLAGS = -I$(srcdir)/../lib
-hello_CFLAGS = -std=c99 # CXXFLAGS
-hello_LDADD = ../lib/libhello.la # -L../../amhello/lib/.libs/ -lhello
+$ cat foo/Makefile.am
+lib_LTLIBRARIES = libfoo.la
+libfoo_la_SOURCES = foo.c foo.h
+#libfoo_la_CPPFLAGS = -I../bar
+#libfoo_la_LIBADD = ../bar/libbar.la # -L../bar/.libs/ -lbar
+CFLAGS = -std=c99 -g # CXXFLAGS
 $
-$ vi lib/Makefile
-lib_LTLIBRARIES = libhello.la
-libhello_la_SOURCES = say.c say.h
-libhello_la_CPPFLAGS = -I../lib
-libhello_la_LIBADD = ../lib/libhello.la # -L../../amhello/lib/.libs/ -lhello
+$ cat main/Makefile.am
+bin_PROGRAMS = main
+main_SOURCES = main.c
+main_CPPFLAGS = -I../foo
+main_LDADD = ../foo/libfoo.la # -L../foo/.libs -lfoo
+CFLAGS = -std=c99 -g # CXXFLAGS
 $
-$ mkdir m4
-$ autoreconf -i # or, put it in autogen.sh
-$ ./configure # generate Makefile
-$ make
+$ autoreconf -i && ./configure && make
+$
+$ cat autogen.sh
+# usage
+# ./autogen
+# ./autogen clean
 
-$ make DESTDIR=$HOME/inst install # or, ./configure --PREFIX $HOME/inst
-$ cd $HOME/inst
-$ tar zcvf ~/amhello-1.0-i686.tar.gz .
-~/amhello-1.0-i686.tar.gz is ready to be uncompressed in / on any hosts
-$ ls ./lib/.libs
-libhello.a  libhello.la  libhello.lai  libhello.so  say.o
+# autogen
+if (( $# == 0 )); then
+    [[ ! -d m4 ]] && mkdir m4
+    autoreconf -i
+fi
+
+# clean
+if [[ $1 == "clean" ]]; then
+    # temporary files generated during autoreconf -i
+    rm -fr aclocal.m4 compile config.* configure \
+        configure~ depcomp install-sh m4 missing ar-lib \
+        autom4te.cache ltmain.sh
+
+    find . -name "Makefile.in" -exec rm -fr {} \;
+
+    # temporary files generated during ./configure
+    rm -fr libtool stamp-h1
+    find . -name ".deps" -type d -exec rm -fr {} \;
+    find . -name "Makefile" -exec rm -fr {} \;
+fi
 $
-```
