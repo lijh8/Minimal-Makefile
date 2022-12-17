@@ -24,7 +24,7 @@ $ apt install automake autoconf libtool pkg-config gettext
 $
 $ autoscan
 $ mv configure.scan configure.ac
-$ vi configure.ac
+$ cat configure.ac
 
 AC_PREREQ([2.71])
 AC_INIT([PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDR])
@@ -49,16 +49,16 @@ $
 $ cat foo/Makefile.am
 lib_LTLIBRARIES = libfoo.la
 libfoo_la_SOURCES = foo.c foo.h
-#libfoo_la_CPPFLAGS = -I../bar
-#libfoo_la_LIBADD = ../bar/libbar.la # -L../bar/.libs/ -lbar
 CFLAGS = -std=c99 -g # CXXFLAGS
+#CPPFLAGS = -I../bar
+#LDFLAGS = -L../bar/.libs/ -lbar
 $
 $ cat main/Makefile.am
 bin_PROGRAMS = main
 main_SOURCES = main.c
-main_CPPFLAGS = -I../foo
-main_LDADD = ../foo/libfoo.la # -L../foo/.libs -lfoo
 CFLAGS = -std=c99 -g # CXXFLAGS
+CPPFLAGS = -I../foo
+LDFLAGS = -L../foo/.libs -lfoo
 $
 $ autoreconf -i && ./configure && make
 $
