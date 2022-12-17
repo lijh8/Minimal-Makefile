@@ -78,7 +78,7 @@ CPPFLAGS = -MMD -MP -I../hello
 #CC      = $(CXX) # link with CXX for .cpp
 
 # linking to .so or .dylib
-#LDFLAGS += -Wl,-rpath,../hello
+#LDFLAGS += -Wl,-rpath,/path/hello
 
 # target name is basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
