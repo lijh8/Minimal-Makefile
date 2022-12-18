@@ -1,21 +1,21 @@
 $ cd myproject
 $ ls
-Makefile  hello  main
+Makefile  bar  main
 $
 $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 .
 |____Makefile
-|____hello
+|____bar
 | |____Makefile
-| |____hello.c
-| |____hello.h
+| |____bar.c
+| |____bar.h
 |____main
 | |____Makefile
 | |____main.c
 $
 $
 $ cat Makefile
-SUBDIRS = hello main
+SUBDIRS = bar main
 subdirs : $(SUBDIRS)
 $(SUBDIRS) :
   make -C $@
@@ -25,46 +25,46 @@ clean :
   done
 .PHONY : $(SUBDIRS) subdirs clean
 
-main : hello
-hello :
+main : bar
+bar :
   make -C $@
-  cp hello/hello hello/libhello.so # Linux
-  # cp hello/hello hello/libhello.dylib # macOS
+  cp bar/bar bar/libbar.so # Linux
+  # cp bar/bar bar/libbar.dylib # macOS
 $
 $
-$ cat hello/Makefile
+$ cat bar/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
-LDFLAGS  = -shared # -L./hello
-LDLIBS   = # -lhello
-CPPFLAGS = -MMD -MP # -I./hello
+LDFLAGS  = -shared # -L../bar
+LDLIBS   = # -lbar
+CPPFLAGS = -MMD -MP # -I../bar
 #CC      = $(CXX) # link with CXX for .cpp
 
-# building .dylib, macOS
-#LDFLAGS += -install_name @rpath/hello
+# specify install_name for .dylib itself on macOS
+#LDFLAGS += -install_name @rpath/bar
 
 # target name is basename of one of the source files
-hello : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+bar : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d
 .PHONY : clean
 $
 $
-$ cat hello/hello.c
+$ cat bar/bar.c
 #include <stdio.h>
-#include "hello.h"
+#include "bar.h"
 
-void hello()
+void bar()
 {
-  printf("hello\n");
+  printf("bar\n");
 }
 $
 $
-$ cat hello/hello.h
-#ifndef _hello_
-#define _hello_
+$ cat bar/bar.h
+#ifndef _bar_
+#define _bar_
 
-void hello();
+void bar();
 
 #endif
 $
@@ -72,13 +72,13 @@ $
 $ cat main/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-LDFLAGS  = -L../hello # -shared
-LDLIBS   = -lhello
-CPPFLAGS = -MMD -MP -I../hello
+LDFLAGS  = -L../bar # -shared
+LDLIBS   = -lbar
+CPPFLAGS = -MMD -MP -I../bar
 #CC      = $(CXX) # link with CXX for .cpp
 
 # linking to .so or .dylib
-#LDFLAGS += -Wl,-rpath,/path/hello
+#LDFLAGS += -Wl,-rpath,/foo/bar
 
 # target name is basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
@@ -89,14 +89,12 @@ $
 $
 $ cat main/main.c
 #include <stdio.h>
-#include "hello.h"
+#include "bar.h"
 
 int main()
 {
   printf("main\n");
 
-  //lldb needs rpath to debug .dylib on macOS.
-  //The debugger does not use DYLD_LIBRARY_PATH.
-  hello();
+  bar();
 }
 $
