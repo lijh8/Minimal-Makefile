@@ -1,21 +1,25 @@
-$ cd myproject
+# main -> libfoo.so -> libbar.so
+
 $ ls
-Makefile  bar  main
+Makefile  bar  foo  main
 $
 $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 .
 |____Makefile
+|____foo
+| |____Makefile
+| |____foo.c
+| |____foo.h
 |____bar
 | |____Makefile
-| |____bar.c
 | |____bar.h
+| |____bar.c
 |____main
 | |____Makefile
 | |____main.c
 $
-$
 $ cat Makefile
-SUBDIRS = bar main
+SUBDIRS = bar foo main
 subdirs : $(SUBDIRS)
 $(SUBDIRS) :
   make -C $@
@@ -25,76 +29,54 @@ clean :
   done
 .PHONY : $(SUBDIRS) subdirs clean
 
-main : bar
+main : foo
+foo : bar
+foo :
+  make -C $@
+  cp foo/foo foo/libfoo.so
 bar :
   make -C $@
-  cp bar/bar bar/libbar.so # Linux
-  # cp bar/bar bar/libbar.dylib # macOS
-$
+  cp bar/bar bar/libbar.so
 $
 $ cat bar/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
-LDFLAGS  = -shared # -L../bar
-LDLIBS   = # -lbar
-CPPFLAGS = -MMD -MP # -I../bar
+LDFLAGS  = -shared # -L../xxx -Wl,-rpath,'$$ORIGIN/../xxx'
+LDLIBS   = # -lxxx
+CPPFLAGS = -MMD -MP # -I../xxx
 #CC      = $(CXX) # link with CXX for .cpp
-
-# specify install_name for .dylib itself on macOS
-#LDFLAGS += -install_name @rpath/bar
 
 # target name is basename of one of the source files
 bar : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
-clean : ; -rm -fr *.o *.d
+clean : ; -rm -fr *.o *.d bar
 .PHONY : clean
 $
-$
-$ cat bar/bar.c
-#include <stdio.h>
-#include "bar.h"
-
-void bar()
-{
-  printf("bar\n");
-}
-$
-$
-$ cat bar/bar.h
-#ifndef _bar_
-#define _bar_
-
-void bar();
-
-#endif
-$
-$
-$ cat main/Makefile
+$ cat foo/Makefile
 # build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-LDFLAGS  = -L../bar # -shared
+CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
+LDFLAGS  = -L../bar -Wl,-rpath,'$$ORIGIN/../bar' -shared
 LDLIBS   = -lbar
 CPPFLAGS = -MMD -MP -I../bar
 #CC      = $(CXX) # link with CXX for .cpp
 
-# linking to .so or .dylib
-#LDFLAGS += -Wl,-rpath,'$$ORIGIN/../foo'
+# target name is basename of one of the source files
+foo : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+-include *.d
+clean : ; -rm -fr *.o *.d foo
+.PHONY : clean
+$
+$ cat main/Makefile
+# build shared library with -fPIC, -shared
+CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
+LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
+LDLIBS   = -lfoo
+CPPFLAGS = -MMD -MP -I../foo
+#CC      = $(CXX) # link with CXX for .cpp
 
 # target name is basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
-clean : ; -rm -fr *.o *.d
+clean : ; -rm -fr *.o *.d main
 .PHONY : clean
-$
-$
-$ cat main/main.c
-#include <stdio.h>
-#include "bar.h"
-
-int main()
-{
-  printf("main\n");
-
-  bar();
-}
 $
