@@ -18,26 +18,26 @@ $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 | |____Makefile
 | |____main.c
 $
+
 $ cat Makefile
 SUBDIRS = bar foo main
 subdirs : $(SUBDIRS)
 $(SUBDIRS) :
-  make -C $@
+	make -C $@
+	cp $@/$@ $@/lib$@.so
 clean :
-  for dir in $(SUBDIRS); do \
-    make -C $$dir $@; \
-  done
+	for dir in $(SUBDIRS); do \
+		make -C $$dir $@; \
+	done
 .PHONY : $(SUBDIRS) subdirs clean
+
+main :
+	make -C $@
 
 main : foo
 foo : bar
-foo :
-  make -C $@
-  cp foo/foo foo/libfoo.so
-bar :
-  make -C $@
-  cp bar/bar bar/libbar.so
 $
+
 $ cat bar/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
@@ -52,6 +52,7 @@ bar : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 clean : ; -rm -fr *.o *.d bar
 .PHONY : clean
 $
+
 $ cat foo/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
@@ -66,6 +67,7 @@ foo : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 clean : ; -rm -fr *.o *.d foo
 .PHONY : clean
 $
+
 $ cat main/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
