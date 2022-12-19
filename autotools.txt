@@ -55,18 +55,18 @@ $
 $ cat bar/Makefile.am
 lib_LTLIBRARIES = libbar.la
 libbar_la_SOURCES = bar.c bar.h
-CFLAGS = -std=c99 -g # CXXFLAGS
-#CPPFLAGS = -I../bar
-#LDFLAGS = -L../bar/.libs/ -lbar
-#LDFLAGS = -install_name @rpath/bar
+CFLAGS = -std=c99 -g -fPIC # CXXFLAGS
+#CPPFLAGS = -I../xxx
+LDFLAGS = -shared # -L../xxx/.libs/ -lxxx
+#LDFLAGS += -Wl,-rpath,'$$ORIGIN/../../xxx/.libs'
 $
 
 $ cat foo/Makefile.am
 lib_LTLIBRARIES = libfoo.la
 libfoo_la_SOURCES = foo.c foo.h
-CFLAGS = -std=c99 -g # CXXFLAGS
+CFLAGS = -std=c99 -g -fPIC # CXXFLAGS
 CPPFLAGS = -I../bar
-LDFLAGS = -L../bar/.libs/ -lbar
+LDFLAGS = -shared -L../bar/.libs/ -lbar
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../../bar/.libs'
 $
 
