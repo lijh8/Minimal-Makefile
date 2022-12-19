@@ -1,14 +1,16 @@
-SUBDIRS = hello main
+SUBDIRS = bar foo main
 subdirs : $(SUBDIRS)
 $(SUBDIRS) :
 	make -C $@
+	cp $@/$@ $@/lib$@.so
 clean :
 	for dir in $(SUBDIRS); do \
 		make -C $$dir $@; \
 	done
 .PHONY : $(SUBDIRS) subdirs clean
 
-main : hello
-hello :
+main :
 	make -C $@
-	cp hello/hello hello/libhello.so
+
+main : foo
+foo : bar
