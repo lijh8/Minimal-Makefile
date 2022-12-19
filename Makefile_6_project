@@ -24,9 +24,9 @@ $
 $ cat src/bar/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP # -I./hello
-LDFLAGS  = -shared # -L./hello -Wl,-rpath,'$$ORIGIN/../bar'
-LDLIBS   = # -lhello
+CPPFLAGS = -MMD -MP # -I../xxx
+LDFLAGS  = -shared # -L../xxx -Wl,-rpath,'$$ORIGIN/../xxx'
+LDLIBS   = # -lxxx
 #CC      = $(CXX) # link with CXX for .cpp
 
 # target name is basename of one of the source files
