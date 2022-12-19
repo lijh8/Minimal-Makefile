@@ -73,9 +73,9 @@ $
 $ cat main/Makefile.am
 bin_PROGRAMS = main
 main_SOURCES = main.c
-CFLAGS = -std=c99 -g # CXXFLAGS
+CFLAGS = -std=c99 -g # -fPIC # CXXFLAGS
 CPPFLAGS = -I../foo
-LDFLAGS = -L../foo/.libs -lfoo
+LDFLAGS = -L../foo/.libs -lfoo # -shared
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../../foo/.libs'
 $
 
