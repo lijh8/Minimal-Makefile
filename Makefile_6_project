@@ -1,25 +1,72 @@
 # main -> libfoo.so -> libbar.so
 
-$ ls
-Makefile  bar  foo  main
-$
 $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 .
-|____Makefile
-|____foo
+|____.vscode
+| |____launch.json
+| |____settings.json
+| |____tasks.json
+|____src
+| |____foo
+| | |____Makefile
+| | |____foo.c
+| | |____foo.h
+| |____main
+| | |____main.c
+| | |____Makefile
 | |____Makefile
-| |____foo.c
-| |____foo.h
-|____bar
-| |____Makefile
-| |____bar.h
-| |____bar.c
-|____main
-| |____Makefile
-| |____main.c
+| |____bar
+| | |____bar.c
+| | |____Makefile
+| | |____bar.h
 $
 
-$ cat Makefile
+$ cat src/bar/Makefile
+# build shared library with -fPIC, -shared
+CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
+CPPFLAGS = -MMD -MP # -I./hello
+LDFLAGS  = -shared # -L./hello -Wl,-rpath,'$$ORIGIN/../bar'
+LDLIBS   = # -lhello
+#CC      = $(CXX) # link with CXX for .cpp
+
+# target name is basename of one of the source files
+bar : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+-include *.d
+clean : ; -rm -fr *.o *.d bar
+.PHONY : clean
+$
+
+$ cat src/foo/Makefile
+# build shared library with -fPIC, -shared
+CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
+CPPFLAGS = -MMD -MP -I../bar
+LDFLAGS  = -shared -L../bar -Wl,-rpath,'$$ORIGIN/../bar'
+LDLIBS   = -lbar
+#CC      = $(CXX) # link with CXX for .cpp
+
+# target name is basename of one of the source files
+foo : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+-include *.d
+clean : ; -rm -fr *.o *.d foo
+.PHONY : clean
+$
+
+$ cat src/main/Makefile
+# build shared library with -fPIC, -shared
+CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
+CPPFLAGS = -MMD -MP -I../foo
+LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
+LDLIBS   = -lfoo
+#CC      = $(CXX) # link with CXX for .cpp
+
+# target name is basename of one of the source files
+main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+-include *.d
+clean : ; -rm -fr *.o *.d main
+.PHONY : clean
+$
+
+$ cat src/Makefile
 SUBDIRS = bar foo main
 subdirs : $(SUBDIRS)
 $(SUBDIRS) :
@@ -38,47 +85,46 @@ main : foo
 foo : bar
 $
 
-$ cat bar/Makefile
-# build shared library with -fPIC, -shared
-CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
-LDFLAGS  = -shared # -L../xxx -Wl,-rpath,'$$ORIGIN/../xxx'
-LDLIBS   = # -lxxx
-CPPFLAGS = -MMD -MP # -I../xxx
-#CC      = $(CXX) # link with CXX for .cpp
-
-# target name is basename of one of the source files
-bar : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
-clean : ; -rm -fr *.o *.d bar
-.PHONY : clean
+$ cat .vscode/launch.json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug",
+      "program": "${workspaceFolder}/src/main/${fileBasenameNoExtension}",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/main",
+      "preLaunchTask": "make",
+    }
+  ]
+}
 $
 
-$ cat foo/Makefile
-# build shared library with -fPIC, -shared
-CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
-LDFLAGS  = -L../bar -Wl,-rpath,'$$ORIGIN/../bar' -shared
-LDLIBS   = -lbar
-CPPFLAGS = -MMD -MP -I../bar
-#CC      = $(CXX) # link with CXX for .cpp
-
-# target name is basename of one of the source files
-foo : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
-clean : ; -rm -fr *.o *.d foo
-.PHONY : clean
+$ cat .vscode/tasks.json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "make",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
+      "command": "/usr/bin/make",
+    }
+  ]
+}
 $
 
-$ cat main/Makefile
-# build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
-LDLIBS   = -lfoo
-CPPFLAGS = -MMD -MP -I../foo
-#CC      = $(CXX) # link with CXX for .cpp
-
-# target name is basename of one of the source files
-main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
-clean : ; -rm -fr *.o *.d main
-.PHONY : clean
+$ cat .vscode/settings.json
+{
+  "clangd.fallbackFlags": [
+    // "-std=c++2a",
+    "-I${workspaceFolder}/src/foo",
+    "-I${workspaceFolder}/src/bar",
+    // "-I${workspaceFolder}/boost",
+  ],
+}
 $
