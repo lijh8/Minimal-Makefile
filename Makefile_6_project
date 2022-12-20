@@ -76,7 +76,7 @@ $(LIBDIRS) :
 $(MAIN) :
 	$(MAKE) -C $@
 clean :
-	for dir in $(LIBDIRS) $(MAIN) ; do \
+	for dir in $(LIBDIRS) $(MAIN); do \
 		$(MAKE) -C $$dir $@; \
 	done
 .PHONY : $(LIBDIRS) $(MAIN) all clean
