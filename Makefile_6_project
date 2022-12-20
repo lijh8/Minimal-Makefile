@@ -68,17 +68,17 @@ $
 
 $ cat src/Makefile
 LIBDIRS = bar foo
-all : main $(LIBDIRS)
-main :
-	make -C $@
+all : $(LIBDIRS) main
 $(LIBDIRS) :
 	make -C $@
 	cp $@/$@ $@/lib$@.so
+main :
+	make -C $@
 clean :
-	for dir in main $(LIBDIRS); do \
+	for dir in $(LIBDIRS) main ; do \
 		make -C $$dir $@; \
 	done
-.PHONY : main $(LIBDIRS) all clean
+.PHONY : $(LIBDIRS) main all clean
 
 main : foo
 foo : bar
