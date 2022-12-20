@@ -67,19 +67,18 @@ clean : ; -rm -fr *.o *.d main
 $
 
 $ cat src/Makefile
-SUBDIRS = bar foo main
-subdirs : $(SUBDIRS)
-$(SUBDIRS) :
+LIBDIRS = bar foo
+all : main $(LIBDIRS)
+main :
+	make -C $@
+$(LIBDIRS) :
 	make -C $@
 	cp $@/$@ $@/lib$@.so
 clean :
-	for dir in $(SUBDIRS); do \
+	for dir in main $(LIBDIRS); do \
 		make -C $$dir $@; \
 	done
-.PHONY : $(SUBDIRS) subdirs clean
-
-main :
-	make -C $@
+.PHONY : main $(LIBDIRS) all clean
 
 main : foo
 foo : bar
