@@ -1,4 +1,9 @@
-# main -> libfoo.so -> libbar.so
+# Why Makefile
+# 1. autotools automake doesnt support $(wildcard) for lazy developers.
+# 2. CMake doesnt support CPPFLAGS, LDFLAGS, LDLIBS directly.
+
+# main1 -> libfoo.so -> libbar.so
+# main2 -> libfoo.so -> libbar.so
 
 $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 .
@@ -9,16 +14,21 @@ $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 |____src
 | |____foo
 | | |____Makefile
+| | |____libfoo.so
 | | |____foo.c
 | | |____foo.h
-| |____main
-| | |____main.c
+| |____main1
+| | |____main1.c
 | | |____Makefile
 | |____Makefile
 | |____bar
 | | |____bar.c
+| | |____libbar.so
 | | |____Makefile
 | | |____bar.h
+| |____main2
+| | |____main2.c
+| | |____Makefile
 $
 
 $ cat src/bar/Makefile
@@ -51,7 +61,7 @@ clean : ; -rm -fr *.o *.d foo
 .PHONY : clean
 $
 
-$ cat src/main/Makefile
+$ cat src/main1/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP -I../foo
@@ -60,42 +70,60 @@ LDLIBS   = -lfoo
 #CC      = $(CXX) # link with CXX for .cpp
 
 # target name is basename of one of the source files
-main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+main1 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
-clean : ; -rm -fr *.o *.d main
+clean : ; -rm -fr *.o *.d main1
+.PHONY : clean
+$
+
+$ cat src/main2/Makefile
+# build shared library with -fPIC, -shared
+CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
+CPPFLAGS = -MMD -MP -I../foo
+LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
+LDLIBS   = -lfoo
+#CC      = $(CXX) # link with CXX for .cpp
+
+# target name is basename of one of the source files
+main2 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+-include *.d
+clean : ; -rm -fr *.o *.d main2
 .PHONY : clean
 $
 
 $ cat src/Makefile
 LIBDIRS = bar foo
-MAIN = main
-all : $(LIBDIRS) $(MAIN)
+MAINDIR = main1 main2
+
+all : $(LIBDIRS) $(MAINDIR)
+foo : bar
+main1 : foo
+main2 : foo
+
+$(MAINDIR) : $(LIBDIRS)
 $(LIBDIRS) :
 	$(MAKE) -C $@
 	cp $@/$@ $@/lib$@.so
-$(MAIN) :
+$(MAINDIR) :
 	$(MAKE) -C $@
 clean :
-	for dir in $(LIBDIRS) $(MAIN); do \
+	for dir in $(LIBDIRS) $(MAINDIR); do \
 		$(MAKE) -C $$dir $@; \
 	done
-.PHONY : $(LIBDIRS) $(MAIN) all clean
-$(MAIN) : $(LIBDIRS)
-foo : bar
+.PHONY : $(LIBDIRS) $(MAINDIR) all clean
 $
 
 $ cat .vscode/launch.json
 {
-  "version": "0.2.0",
   "configurations": [
     {
       "type": "lldb",
       "request": "launch",
       "name": "Debug",
-      "program": "${workspaceFolder}/src/main/${fileBasenameNoExtension}",
+      "program": "${fileDirname}/${fileBasenameNoExtension}", //new
       "args": [],
-      "cwd": "${workspaceFolder}/src/main",
-      "preLaunchTask": "make",
+      "cwd": "${fileDirname}",
+      "preLaunchTask": "make", //new
     }
   ]
 }
@@ -103,15 +131,14 @@ $
 
 $ cat .vscode/tasks.json
 {
-  "version": "2.0.0",
   "tasks": [
     {
-      "label": "make",
+      "label": "make", //new
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/src"
+        "cwd": "${workspaceFolder}/src",
       },
-      "command": "/usr/bin/make",
+      "command": "/usr/bin/make", //new
     }
   ]
 }
@@ -121,9 +148,9 @@ $ cat .vscode/settings.json
 {
   "clangd.fallbackFlags": [
     // "-std=c++2a",
+    // "-I${workspaceFolder}/boost",
     "-I${workspaceFolder}/src/foo",
     "-I${workspaceFolder}/src/bar",
-    // "-I${workspaceFolder}/boost",
   ],
 }
 $
