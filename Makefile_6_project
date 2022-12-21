@@ -93,24 +93,24 @@ $
 
 $ cat src/Makefile
 LIBDIRS = bar foo
-MAINDIR = main1 main2
+MAINDIRS = main1 main2
 
-all : $(LIBDIRS) $(MAINDIR)
+all : $(LIBDIRS) $(MAINDIRS)
 foo : bar
 main1 : foo
 main2 : foo
 
-$(MAINDIR) : $(LIBDIRS)
+$(MAINDIRS) : $(LIBDIRS)
 $(LIBDIRS) :
 	$(MAKE) -C $@
 	cp $@/$@ $@/lib$@.so
-$(MAINDIR) :
+$(MAINDIRS) :
 	$(MAKE) -C $@
 clean :
-	for dir in $(LIBDIRS) $(MAINDIR); do \
+	for dir in $(LIBDIRS) $(MAINDIRS); do \
 		$(MAKE) -C $$dir $@; \
 	done
-.PHONY : $(LIBDIRS) $(MAINDIR) all clean
+.PHONY : $(LIBDIRS) $(MAINDIRS) all clean
 $
 
 $ cat .vscode/launch.json
