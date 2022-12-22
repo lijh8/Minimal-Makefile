@@ -2,37 +2,37 @@ https://www.gnu.org/software/make/manual/make.pdf
 January 2020
 
 2.5 Letting make Deduce the Recipes
-It is not necessary to spell out the recipes for compiling the individual C 
-source files, because make can figure them out: it has an implicit rule for 
-updating a ‘.o’ file from a correspondingly named ‘.c’ file using a ‘cc -c’ 
+It is not necessary to spell out the recipes for compiling the individual C
+source files, because make can figure them out: it has an implicit rule for
+updating a ‘.o’ file from a correspondingly named ‘.c’ file using a ‘cc -c’
 command.
 
 4.3.3 The Function wildcard
-a makefile to compile all C source files in the directory and then link them 
+a makefile to compile all C source files in the directory and then link them
 together could be written as follows:
 
     objects := $(patsubst %.c,%.o,$(wildcard *.c))
     foo : $(objects)
         cc -o foo $(objects)
 
-(This takes advantage of the implicit rule for compiling C programs, so there is 
+(This takes advantage of the implicit rule for compiling C programs, so there is
 no need to write explicit rules for compiling the files)
 
 4.13 Generating Prerequisites Automatically
 use the ‘-MM’ flag
 
 10.1 Using Implicit Rules
-To allow make to find a customary method for updating a target file, all you 
-have to do is refrain from specifying recipes yourself. Either write a rule with 
-no recipe, or don’t write a rule at all. Then make will figure out which 
-implicit rule to use based on which kind of source file exists or can be made. 
+To allow make to find a customary method for updating a target file, all you
+have to do is refrain from specifying recipes yourself. Either write a rule with
+no recipe, or don’t write a rule at all. Then make will figure out which
+implicit rule to use based on which kind of source file exists or can be made.
 For example, suppose the makefile looks like this:
 
     foo : foo.o bar.o
         cc -o foo foo.o bar.o $(CFLAGS) $(LDFLAGS)
 
-Because you mention foo.o but do not give a rule for it, make will automatically 
-look for an implicit rule that tells how to update it. This happens whether or 
+Because you mention foo.o but do not give a rule for it, make will automatically
+look for an implicit rule that tells how to update it. This happens whether or
 not the file foo.o currently exists.
 
 10.2 Catalogue of Built-In Rules
@@ -44,5 +44,90 @@ Compiling C++ programs:
 
 Linking a single object file:
     $(CC) $(LDFLAGS) n.o $(LOADLIBES) $(LDLIBS)
-(if there are multiple object files, one of which has a name matching that of 
+(if there are multiple object files, one of which has a name matching that of
 the executable file)
+
+---
+
+https://www.gnu.org/software/make/
+
+A rule in the makefile tells Make how to execute a series of commands in order
+to build a target file from source files. It also specifies a list of
+dependencies of the target file. This list should include all files (whether
+source files or other targets) which are used as inputs to the commands in the
+rule.
+
+  target: dependencies ...
+    commands
+    ...
+
+If a target file is newer than all of its dependencies, then it is already up to
+date, and it does not need to be regenerated. The other target files do need to
+be updated, but in the right order: each target file must be regenerated before
+it is used in regenerating other targets.
+
+---
+
+https://www.gnu.org/software/make/manual/make.html
+
+The make program uses the makefile data base and the last-modification times of
+the files to decide which of the files need to be updated. For each of those
+files, it issues the recipes recorded in the data base.
+
+---
+
+Example 1:
+
+# an empty makefile
+
+$ cat Makefile
+$
+$ make x  # goal name is basename of the source file
+cc x.c -o x
+$
+
+Example 2:
+
+# a rule without prerequisites and recipes, which just mentions the target
+
+$ cat Makefile
+x:  # target name is basename of the source file
+$
+$ make
+cc x.c -o x
+$
+
+Example 3:
+
+$ cat Makefile
+x: x.o
+$
+$ make
+cc -c -o x.o x.c
+cc x.o -o x
+$
+
+Example 4:
+
+$ cat Makefile
+x: y.o z.o  # no mentioning x.o
+$
+$ make
+cc -c -o y.o y.c
+cc -c -o z.o z.c
+cc x.c y.o z.o -o x
+$
+
+Example 5:
+
+$ cat Makefile
+x: y.o z.o x.o
+$
+$ make
+cc -c -o x.o x.c
+cc -c -o y.o y.c
+cc -c -o z.o z.c
+cc x.o y.o z.o -o x
+$
+
+---
