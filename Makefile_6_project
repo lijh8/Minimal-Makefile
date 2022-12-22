@@ -1,9 +1,14 @@
 # Why Makefile
-# 1. autotools automake doesnt support $(wildcard) for lazy developers.
-# 2. CMake doesnt support CPPFLAGS, LDFLAGS, LDLIBS directly.
+# 1. Autotools automake doesn't support $(wildcard) for lazy developers.
+# 2. CMake doesn't support CPPFLAGS, LDFLAGS, LDLIBS directly.
 
 # main1 -> libfoo.so -> libbar.so
 # main2 -> libfoo.so -> libbar.so
+
+$ cd hello
+$ ls src/
+bar  foo  main1  main2  Makefile
+$
 
 $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 .
