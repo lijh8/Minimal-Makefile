@@ -34,8 +34,6 @@ $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 | | |____CMakeLists.txt
 $
 
-#---
-
 $ cat src/CMakeLists.txt
 cmake_minimum_required(VERSION 3.24)
 project(myproject VERSION 1.0)
