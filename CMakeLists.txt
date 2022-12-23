@@ -109,20 +109,15 @@ $
 
 $ cat .vscode/launch.json
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-  "version": "0.2.0",
   "configurations": [
     {
       "type": "lldb",
       "request": "launch",
       "name": "Debug",
-      // "program": "${fileDirname}/${fileBasenameNoExtension}", //new
-      "program": "${workspaceFolder}/src/build/${fileBasenameNoExtension}/${fileBasenameNoExtension}", //new
+      "program": "${workspaceFolder}/src/build/${fileBasenameNoExtension}/${fileBasenameNoExtension}",
       "args": [],
       "cwd": "${workspaceFolder}/src/build/${fileBasenameNoExtension}/",
-      "preLaunchTask": "make", //new
+      "preLaunchTask": "make",
     }
   ]
 }
@@ -130,17 +125,14 @@ $
 
 $ cat .vscode/tasks.json
 {
-  // See https://go.microsoft.com/fwlink/?LinkId=733558
-  // for the documentation about the tasks.json format
-  "version": "2.0.0",
   "tasks": [
     {
-      "label": "make", //new
+      "label": "make",
       "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}/src",
       },
-      "command": "cmake --build build", //new
+      "command": "/usr/bin/cmake --build build",
     }
   ]
 }
