@@ -144,10 +144,10 @@ $ cat .vscode/launch.json
       "type": "lldb",
       "request": "launch",
       "name": "Debug",
-      "program": "${fileDirname}/.libs/${fileBasenameNoExtension}", //new
+      "program": "${fileDirname}/.libs/${fileBasenameNoExtension}",
       "args": [],
-      "cwd": "${fileDirname}",
-      "preLaunchTask": "make", //new
+      "cwd": "${fileDirname}/.libs",
+      "preLaunchTask": "make",
     }
   ]
 }
@@ -157,12 +157,12 @@ $ cat .vscode/tasks.json
 {
   "tasks": [
     {
-      "label": "make", //new
+      "label": "make",
       "type": "shell",
       "options": {
         "cwd": "${workspaceFolder}/src",
       },
-      "command": "/usr/bin/make", //new
+      "command": "/usr/bin/make",
     }
   ]
 }
