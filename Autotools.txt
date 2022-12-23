@@ -1,0 +1,180 @@
+Alexandre Duret-Lutz
+Autotools Tutorial, Handout version in PDF
+(4 slides per pages without animations, for printing)
+https://www.lrde.epita.fr/~adl/autotools.html
+https://www.lrde.epita.fr/~adl/dl/autotools-handout-4.pdf
+
+$ apt install build-essential git perl flex bison gperf
+$ apt install automake autoconf libtool pkg-config gettext
+
+$ autoscan
+$ mv configure.scan configure.ac
+
+# main1 -> libfoo.so -> libbar.so
+# main2 -> libfoo.so -> libbar.so
+
+$ ls src
+autogen.sh  bar  configure.ac  foo  main1  main2  Makefile.am
+$
+
+$ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+.
+|____.vscode
+| |____launch.json
+| |____settings.json
+| |____tasks.json
+|____src
+| |____foo
+| | |____Makefile.am
+| | |____foo.c
+| | |____foo.h
+| |____Makefile.am
+| |____main1
+| | |____Makefile.am
+| | |____main1.c
+| |____autogen.sh
+| |____bar
+| | |____bar.c
+| | |____Makefile.am
+| | |____bar.h
+| |____main2
+| | |____Makefile.am
+| | |____main2.c
+| |____configure.ac
+$
+
+$ cat src/configure.ac
+AC_PREREQ([2.71])
+AC_INIT([PACKAGE-NAME], [VERSION], [BUG-REPORT-ADDR])
+AM_INIT_AUTOMAKE([foreign])
+AC_CONFIG_MACRO_DIRS([m4])
+AM_PROG_AR
+LT_INIT
+AC_PROG_CC # CXX
+
+# put dependency first
+AC_CONFIG_FILES([
+    Makefile
+    bar/Makefile
+    foo/Makefile
+    main1/Makefile
+    main2/Makefile
+    ])
+
+AC_OUTPUT
+$
+
+$ cat src/Makefile.am
+ACLOCAL_AMFLAGS = -I m4
+# put dependency first
+SUBDIRS = bar foo main1 main2
+$
+
+$ cat src/bar/Makefile.am
+lib_LTLIBRARIES = libbar.la
+libbar_la_SOURCES = bar.c bar.h
+CFLAGS = -std=c99 -g -fPIC # CXXFLAGS
+CPPFLAGS = # -I../xxx
+LDFLAGS = -shared # -L../xxx/.libs/ -lxxx
+LDFLAGS += # -Wl,-rpath,'$$ORIGIN/../../xxx/.libs'
+$
+
+$ cat src/foo/Makefile.am
+lib_LTLIBRARIES = libfoo.la
+libfoo_la_SOURCES = foo.c foo.h
+CFLAGS = -std=c99 -g -fPIC # CXXFLAGS
+CPPFLAGS = -I../bar
+LDFLAGS = -shared -L../bar/.libs/ -lbar
+LDFLAGS += -Wl,-rpath,'$$ORIGIN/../../bar/.libs'
+$
+
+$ cat src/main1/Makefile.am
+bin_PROGRAMS = main1
+main1_SOURCES = main1.c
+CFLAGS = -std=c99 -g # -fPIC # CXXFLAGS
+CPPFLAGS = -I../foo
+LDFLAGS = -L../foo/.libs -lfoo # -shared
+LDFLAGS += -Wl,-rpath,'$$ORIGIN/../../foo/.libs'
+$
+
+$ cat src/main2/Makefile.am
+bin_PROGRAMS = main2
+main2_SOURCES = main2.c
+CFLAGS = -std=c99 -g # -fPIC # CXXFLAGS
+CPPFLAGS = -I../foo
+LDFLAGS = -L../foo/.libs -lfoo # -shared
+LDFLAGS += -Wl,-rpath,'$$ORIGIN/../../foo/.libs'
+$
+
+$ cat src/autogen.sh
+# usage
+# ./autogen
+# ./autogen clean
+
+# autogen
+if (( $# == 0 )); then
+    [[ ! -d m4 ]] && mkdir m4
+    autoreconf -i
+fi
+
+# clean
+if [[ $1 == "clean" ]]; then
+    # temporaries by autoreconf -i
+    rm -fr aclocal.m4 compile config.* configure \
+        configure~ depcomp install-sh m4 missing ar-lib \
+        autom4te.cache ltmain.sh
+
+    find . -name "Makefile.in" -exec rm -fr {} \;
+
+    # temporaries by ./configure
+    rm -fr libtool stamp-h1
+    find . -name ".deps" -type d -exec rm -fr {} \;
+    find . -name "Makefile" -exec rm -fr {} \;
+
+    # temporaries by make
+    find . \( -name "*.la" -o -name "*.lai" -o -name "*.lo" \
+        -o -name "*.d" -o -name "*.o" \) -exec rm -fr {} \;
+fi
+$
+
+$ cat .vscode/launch.json
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug",
+      "program": "${fileDirname}/.libs/${fileBasenameNoExtension}", //new
+      "args": [],
+      "cwd": "${fileDirname}",
+      "preLaunchTask": "make", //new
+    }
+  ]
+}
+$
+
+$ cat .vscode/tasks.json
+{
+  "tasks": [
+    {
+      "label": "make", //new
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}/src",
+      },
+      "command": "/usr/bin/make", //new
+    }
+  ]
+}
+$
+
+$ cat .vscode/settings.json
+{
+  "clangd.fallbackFlags": [
+    // "-std=c++2a",
+    // "-I${workspaceFolder}/boost",
+    "-I${workspaceFolder}/src/foo",
+    "-I${workspaceFolder}/src/bar",
+  ],
+}
+$
