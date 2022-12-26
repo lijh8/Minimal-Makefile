@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.24)
 project(myproject VERSION 1.0)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN True)
 set(CMAKE_C_FLAGS "-std=c11 -g") # -O3 # .cpp
-#file(GLOB SOURCES *.c) # .cpp
+file(GLOB SOURCES *.c) # .cpp
 
 add_executable(main ${SOURCES})
 #add_library(main SHARED ${SOURCES})
