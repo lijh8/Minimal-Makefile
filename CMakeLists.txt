@@ -18,14 +18,16 @@ add_executable(main ${SOURCES})
 add_subdirectory(./foo)
 add_subdirectory(./main)
 
-# make DESTDIR=~/tmp install, remove the dir to uninstall
+# remove the dest dir to uninstall
 install(TARGETS foo main)
 $
 
 $ cmake -S . -B build
 $ cmake --build build
+$ cd build; make DESTDIR=~/tmp install
 
 # or,
 $ mkdir build; cd build
 $ cmake ..
 $ make
+$ make DESTDIR=~/tmp install
