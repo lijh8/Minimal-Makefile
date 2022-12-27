@@ -15,11 +15,11 @@ add_executable(main ${SOURCES})
 #target_link_libraries(main PUBLIC foo)
 #target_link_directories(main PUBLIC ../foo)
 #target_include_directories(main PUBLIC ../foo)
-add_subdirectory(./foo)
-add_subdirectory(./main)
+#add_subdirectory(./foo)
 
 # remove the dest dir to uninstall
-install(TARGETS foo main)
+install(TARGETS main # foo
+    )
 $
 
 $ cmake -S . -B build
