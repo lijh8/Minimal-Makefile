@@ -2,95 +2,16 @@
 # 1. Autotools automake doesn't support $(wildcard) for lazy developers.
 # 2. CMake doesn't support CPPFLAGS, LDFLAGS, LDLIBS directly.
 
-# main1 -> libfoo.so -> libbar.so
-# main2 -> libfoo.so -> libbar.so
-
-$ cd hello
-$ ls src/
-bar  foo  main1  main2  Makefile
-$
-
-$ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
-.
-|____.vscode
-| |____launch.json
-| |____settings.json
-| |____tasks.json
-|____src
-| |____foo
-| | |____Makefile
-| | |____libfoo.so
-| | |____foo.c
-| | |____foo.h
-| |____main1
-| | |____main1.c
-| | |____Makefile
-| |____Makefile
-| |____bar
-| | |____bar.c
-| | |____libbar.so
-| | |____Makefile
-| | |____bar.h
-| |____main2
-| | |____main2.c
-| | |____Makefile
-$
-
-$ cat src/bar/Makefile
-# build shared library with -fPIC, -shared
-CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP # -I../xxx
-LDFLAGS  = -shared # -L../xxx -Wl,-rpath,'$$ORIGIN/../xxx'
-LDLIBS   = # -lxxx
-#CC      = $(CXX) # link with CXX for .cpp
-
-# target name is basename of one of the source files
-bar : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
-clean : ; -rm -fr *.o *.d
-.PHONY : clean
-$
-
-$ cat src/foo/Makefile
-# build shared library with -fPIC, -shared
-CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP -I../bar
-LDFLAGS  = -shared -L../bar -Wl,-rpath,'$$ORIGIN/../bar'
-LDLIBS   = -lbar
-#CC      = $(CXX) # link with CXX for .cpp
-
-# target name is basename of one of the source files
-foo : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
-clean : ; -rm -fr *.o *.d
-.PHONY : clean
-$
-
-$ cat src/main1/Makefile
+$ cat src/main/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP -I../foo
-LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
-LDLIBS   = -lfoo
+CPPFLAGS = -MMD -MP # -I../foo
+LDFLAGS  = # -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
+LDLIBS   = # -lfoo
 #CC      = $(CXX) # link with CXX for .cpp
 
 # target name is basename of one of the source files
-main1 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
-clean : ; -rm -fr *.o *.d
-.PHONY : clean
-$
-
-$ cat src/main2/Makefile
-# build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP -I../foo
-LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
-LDLIBS   = -lfoo
-#CC      = $(CXX) # link with CXX for .cpp
-
-# target name is basename of one of the source files
-main2 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d
 .PHONY : clean
