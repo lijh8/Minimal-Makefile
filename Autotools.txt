@@ -28,7 +28,7 @@ ACLOCAL_AMFLAGS = -I m4
 bin_PROGRAMS = main
 #lib_LTLIBRARIES =
 main_SOURCES = main.c
-main_CFLAGS = -std=c99 -g -fPIC # CXXFLAGS
+CFLAGS = -std=c99 -g -fPIC # CXXFLAGS
 main_CPPFLAGS = # -I./foo
 main_LDFLAGS = # -L./foo -lfoo -shared
 
