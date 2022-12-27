@@ -25,15 +25,18 @@ $
 $ cat Makefile.am
 ACLOCAL_AMFLAGS = -I m4
 bin_PROGRAMS = main
-#lib_LTLIBRARIES = 
+#lib_LTLIBRARIES =
 main_SOURCES = main.c
 CFLAGS = -std=c99 -g -fPIC # CXXFLAGS
-CPPFLAGS = # -Ifoo
-LDFLAGS = # -Lfoo -lfoo -shared
+CPPFLAGS = # -I./foo
+LDFLAGS = # -L./foo -lfoo -shared
 LDFLAGS += # -Wl,-rpath,'$$ORIGIN/../foo/.libs'
 
+# rpath for install: make DESTDIR=~/tmp install
+#LDFLAGS += -Wl,-rpath,'$$ORIGIN/../lib'
+
 # put dependency first
-SUBDIRS = foo
+SUBDIRS = ./foo
 $
 
 $ cat autogen.sh
