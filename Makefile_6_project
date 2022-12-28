@@ -1,7 +1,3 @@
-# Why Makefile
-# 1. Autotools automake doesn't support $(wildcard) for lazy developers.
-# 2. CMake doesn't support CPPFLAGS, LDFLAGS, LDLIBS directly.
-
 $ cat src/main/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
