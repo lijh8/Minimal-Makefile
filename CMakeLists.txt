@@ -3,10 +3,11 @@ $ apt install cmake # ninja-build
 $ cat CMakeLists.txt
 cmake_minimum_required(VERSION 3.24)
 project(myproject VERSION 1.0)
-set(CMAKE_C_FLAGS "-std=c99 -g") # -O3 # .cpp
 set(CMAKE_BUILD_RPATH_USE_ORIGIN True)
 set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 #set(CMAKE_BUILD_WITH_INSTALL_RPATH True) # install only
+set(CMAKE_C_STANDARD 11) # .cpp
+set(CMAKE_C_STANDARD_REQUIRED True) # .cpp
 file(GLOB SOURCES *.c) # .cpp
 
 add_executable(main ${SOURCES})
@@ -17,17 +18,17 @@ add_executable(main ${SOURCES})
 #target_include_directories(main PUBLIC ../foo)
 #add_subdirectory(./foo)
 
-# remove the dest dir to uninstall
+# remove the DESTDIR to uninstall
 install(TARGETS main # foo
     )
 $
 
-$ cmake -S . -B build
+# build type: Debug, Release
+$ cmake -DCMAKE_BUILD_TYPE=Debug -S . -B build
 $ cmake --build build
-$ cd build; make DESTDIR=~/tmp install
 
 # or,
-$ mkdir build; cd build
-$ cmake ..
+$ mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Debug ..
 $ make
-$ make DESTDIR=~/tmp install
+
+$ make DESTDIR=~/tmp -C build install
