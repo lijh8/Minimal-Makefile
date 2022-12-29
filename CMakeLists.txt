@@ -5,7 +5,8 @@ cmake_minimum_required(VERSION 3.24)
 project(myproject VERSION 1.0)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
-set(CMAKE_C_STANDARD 11) # .cpp
+set(CMAKE_C_STANDARD 99) # .cpp
+set(CMAKE_C_STANDARD_REQUIRED TRUE) # .cpp
 file(GLOB SOURCES *.c) # .cpp
 
 add_executable(main ${SOURCES})
