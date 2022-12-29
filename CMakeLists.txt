@@ -16,7 +16,7 @@ add_executable(main ${SOURCES})
 #target_include_directories(main PUBLIC ../foo)
 #add_subdirectory(./foo)
 
-# make DESTDIR=~/tmp install
+# make DESTDIR=~/myproject install
 install(TARGETS main # foo
     )
 $
@@ -30,4 +30,4 @@ $ mkdir build; cd build;
 $ cmake -DCMAKE_BUILD_TYPE=Debug ..
 $ make -s # silent
 
-$ make DESTDIR=~/tmp -C build install
+$ make DESTDIR=~/myproject -C build install
