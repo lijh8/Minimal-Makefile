@@ -3,7 +3,7 @@
 
 $ ls
 bar  foo  main1  main2  Makefile
-$ 
+$
 
 $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 .
@@ -22,9 +22,10 @@ $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 |____main2
 | |____main2.c
 | |____Makefile
-$ 
+$
 
-$ cat Makefile 
+$ cat Makefile
+
 SUBDIRS = bar foo main1 main2
 
 all : $(SUBDIRS)
@@ -49,14 +50,24 @@ main1 :
 main2 :
 	$(MAKE) -C $@
 
+# make DESTDIR=~/myproject install
+install:
+	mkdir -p "$(DESTDIR)/usr/local/bin"
+	mkdir -p "$(DESTDIR)/usr/local/lib"
+	cp main1/main1 "$(DESTDIR)/usr/local/bin"
+	cp main2/main2 "$(DESTDIR)/usr/local/bin"
+	cp bar/*.so bar/*.so.* "$(DESTDIR)/usr/local/lib"
+	cp foo/*.so foo/*.so.* "$(DESTDIR)/usr/local/lib"
+
 clean :
 	for dir in $(SUBDIRS); do \
 		$(MAKE) -C $$dir $@; \
 	done
 .PHONY : $(SUBDIRS) all clean
-$ 
 
-$ cat main1/Makefile 
+$
+
+$ cat main1/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP -I../foo
@@ -71,9 +82,9 @@ main1 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d main1
 .PHONY : clean
-$ 
+$
 
-$ cat main1/Makefile 
+$ cat main1/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP -I../foo
@@ -88,9 +99,9 @@ main1 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d main1
 .PHONY : clean
-$ 
+$
 
-$ cat foo/Makefile 
+$ cat foo/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP -I../bar
@@ -106,9 +117,9 @@ foo : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d foo *.so *.so.*
 .PHONY : clean
-$ 
+$
 
-$ cat bar/Makefile 
+$ cat bar/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP # -I../foo
@@ -123,4 +134,4 @@ bar : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d bar *.so *.so.*
 .PHONY : clean
-$ 
+$
