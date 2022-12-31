@@ -2,8 +2,8 @@
 # Makefile with rpath for build and install
 
 $ ls
-bar  foo  main1  main2  Makefile
-$
+bar  foo  main1  main2  Makefile
+$ 
 
 $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 .
@@ -22,9 +22,9 @@ $ find . | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
 |____main2
 | |____main2.c
 | |____Makefile
-$
+$ 
 
-$ cat Makefile
+$ cat Makefile 
 SUBDIRS = bar foo main1 main2
 
 all : $(SUBDIRS)
@@ -54,15 +54,15 @@ clean :
 		$(MAKE) -C $$dir $@; \
 	done
 .PHONY : $(SUBDIRS) all clean
-$
+$ 
 
-$ cat main1/Makefile
+$ cat main1/Makefile 
 # build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
+CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP -I../foo
-LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
-LDLIBS   = -lfoo
-#CC      = $(CXX) # link with CXX for .cpp
+LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
+LDLIBS   = -lfoo
+#CC      = $(CXX) # link with CXX for .cpp
 
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../lib'
 
@@ -71,15 +71,15 @@ main1 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d main1
 .PHONY : clean
-$
+$ 
 
-$ cat main1/Makefile
+$ cat main1/Makefile 
 # build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
+CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP -I../foo
-LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
-LDLIBS   = -lfoo
-#CC      = $(CXX) # link with CXX for .cpp
+LDFLAGS  = -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
+LDLIBS   = -lfoo
+#CC      = $(CXX) # link with CXX for .cpp
 
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../lib'
 
@@ -88,15 +88,15 @@ main1 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d main1
 .PHONY : clean
-$
+$ 
 
-$ cat foo/Makefile
+$ cat foo/Makefile 
 # build shared library with -fPIC, -shared
-CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
+CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP -I../bar
-LDFLAGS  = -shared -L../bar -Wl,-rpath,'$$ORIGIN/../bar'
-LDLIBS   = -lbar
-#CC      = $(CXX) # link with CXX for .cpp
+LDFLAGS  = -shared -L../bar -Wl,-rpath,'$$ORIGIN/../bar'
+LDLIBS   = -lbar
+#CC      = $(CXX) # link with CXX for .cpp
 
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../lib'
 LDFLAGS += -Wl,-soname,$(soversion)
@@ -106,15 +106,15 @@ foo : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d foo *.so *.so.*
 .PHONY : clean
-$
+$ 
 
-$ cat bar/Makefile
+$ cat bar/Makefile 
 # build shared library with -fPIC, -shared
-CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
+CFLAGS   = -g -fPIC # -O3 # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP # -I../foo
-LDFLAGS  = -shared # -L../foo -Wl,-rpath,'$$ORIGIN/../foo' #
-LDLIBS   = # -lfoo
-#CC      = $(CXX) # link with CXX for .cpp
+LDFLAGS  = -shared # -L../foo -Wl,-rpath,'$$ORIGIN/../foo' #
+LDLIBS   = # -lfoo
+#CC      = $(CXX) # link with CXX for .cpp
 
 LDFLAGS += -Wl,-soname,$(soversion)
 
@@ -123,4 +123,4 @@ bar : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
 clean : ; -rm -fr *.o *.d bar *.so *.so.*
 .PHONY : clean
-$
+$ 
