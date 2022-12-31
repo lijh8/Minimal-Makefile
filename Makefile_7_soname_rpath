@@ -54,10 +54,10 @@ main2 :
 install:
 	install -d "$(DESTDIR)/usr/local/bin"
 	install -d "$(DESTDIR)/usr/local/lib"
-	install -m755 -D main1/main1 "$(DESTDIR)/usr/local/bin"
-	install -m755 -D main2/main2 "$(DESTDIR)/usr/local/bin"
-	install -m755 -D bar/*.so bar/*.so.* "$(DESTDIR)/usr/local/lib"
-	install -m755 -D foo/*.so foo/*.so.* "$(DESTDIR)/usr/local/lib"
+	install -m755 main1/main1 "$(DESTDIR)/usr/local/bin"
+	install -m755 main2/main2 "$(DESTDIR)/usr/local/bin"
+	install -m755 bar/*.so bar/*.so.* "$(DESTDIR)/usr/local/lib"
+	install -m755 foo/*.so foo/*.so.* "$(DESTDIR)/usr/local/lib"
 
 clean :
 	for dir in $(SUBDIRS); do \
