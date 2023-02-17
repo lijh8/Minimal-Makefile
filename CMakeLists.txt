@@ -5,11 +5,12 @@ cmake_minimum_required(VERSION 3.18)
 project(MyProject VERSION 1.0)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 set(CMAKE_INSTALL_RPATH $ORIGIN/../lib)
+#set(CMAKE_C_COMPILER gcc) # .cpp
+set(CMAKE_C_STANDARD 11) # .cpp
+set(CMAKE_C_STANDARD_REQUIRED TRUE) # .cpp
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
   set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -fsanitize=address) # .cpp
 endif()
-set(CMAKE_C_STANDARD 11) # .cpp
-set(CMAKE_C_STANDARD_REQUIRED TRUE) # .cpp
 #file(GLOB SOURCES *.c) # .cpp
 
 add_executable(main ${SOURCES})
