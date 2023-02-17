@@ -11,7 +11,7 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE) # .cpp
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
   set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -fsanitize=address) # .cpp
 endif()
-#file(GLOB SOURCES *.c) # .cpp
+file(GLOB SOURCES *.c) # .cpp
 
 add_executable(main ${SOURCES})
 #add_library(main SHARED ${SOURCES})
