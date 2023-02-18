@@ -1,3 +1,4 @@
+
 $ apt install cmake
 
 $ vi CMakeLists.txt
@@ -5,7 +6,7 @@ cmake_minimum_required(VERSION 3.18)
 project(MyProject VERSION 1.0)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 set(CMAKE_INSTALL_RPATH $ORIGIN/../lib)
-#set(CMAKE_C_COMPILER g++) # .cpp
+#set(CMAKE_C_COMPILER gcc) # .cpp
 add_compile_options(-std=c11 -I./foo) # .cpp
 add_link_options(-pthread -L./foo)
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
