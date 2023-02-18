@@ -1,30 +1,33 @@
-
 $ apt install cmake
 
 $ vi CMakeLists.txt
+
 cmake_minimum_required(VERSION 3.18)
 project(MyProject VERSION 1.0)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 set(CMAKE_INSTALL_RPATH $ORIGIN/../lib)
-#set(CMAKE_C_COMPILER gcc) # .cpp
-add_compile_options(-std=c11 -I./foo) # .cpp
-add_link_options(-pthread -L./foo)
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
   add_link_options(-fsanitize=address)
 endif()
-file(GLOB SOURCES *.c) # .cpp
+#include_directories(../foo)
+#link_directories(../foo)
+#link_libraries(foo)
+#set(CMAKE_C_COMPILER gcc) # .cpp
+add_compile_options(-std=c11) # .cpp
+#file(GLOB SOURCES *.c) # .cpp
 
-add_executable(main ${SOURCES})
+#add_executable(main ${SOURCES})
 #add_library(main SHARED ${SOURCES})
 #set_target_properties(main PROPERTIES VERSION 1.2.3 SOVERSION 1.2)
-#add_subdirectory(./foo)
+add_subdirectory(./main)
 
 # make -C build DESTDIR=~/MyProject install
 install(TARGETS main # foo
        )
-#file(GLOB DYN_LIB ../lib/*so*)
-#install(FILES ${DYN_LIB} DESTINATION lib
+#file(GLOB LIBRARIES ../lib/*so*)
+#install(FILES ${LIBRARIES} DESTINATION lib
 #       )
+
 $
 
 $ vi main.c
