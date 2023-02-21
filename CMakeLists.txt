@@ -11,9 +11,9 @@ set(CMAKE_INSTALL_RPATH $ORIGIN/../lib)
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
   add_link_options(-fsanitize=address)
 endif()
-link_libraries(foo)
-link_directories(../foo)
-include_directories(../foo)
+#link_libraries(foo)
+#link_directories(../foo)
+#include_directories(../foo)
 #add_compile_definitions(VAR) # VAR=value
 add_compile_options(-std=c11) # .cpp
 #set(CMAKE_C_COMPILER gcc) # .cpp
@@ -25,8 +25,8 @@ add_executable(main ${SOURCES})
 #add_subdirectory(./foo)
 
 # make -C build DESTDIR=~/foo install
-#install(TARGETS main) # foo
-#file(GLOB LIBRARIES ../lib/*so*)
+install(TARGETS main) # foo
+#file(GLOB LIBRARIES ../lib/*.so*)
 #install(FILES ${LIBRARIES} DESTINATION lib)
 
 $
