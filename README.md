@@ -1,2 +1,1 @@
-# Makefile
-Generic Makefile
+# Minimal-Makefile
