@@ -11,7 +11,8 @@ all: main
 
 # turn off assert() with NDEBUG
 ifdef NDEBUG
-CFLAGS += -O3 -DNDEBUG
+CPPFLAGS += -DNDEBUG
+CFLAGS += -O3
 else
 CFLAGS += -g
 endif

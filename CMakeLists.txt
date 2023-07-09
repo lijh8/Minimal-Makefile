@@ -1,4 +1,3 @@
-
 $ apt install cmake
 
 $ vi CMakeLists.txt
