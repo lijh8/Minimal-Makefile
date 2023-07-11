@@ -1,11 +1,13 @@
 https://www.gnu.org/software/make/manual/make.pdf
 January 2020
 
+
 2.5 Letting make Deduce the Recipes
 It is not necessary to spell out the recipes for compiling the individual C
 source files, because make can figure them out: it has an implicit rule for
 updating a ‘.o’ file from a correspondingly named ‘.c’ file using a ‘cc -c’
 command.
+
 
 4.3.3 The Function wildcard
 a makefile to compile all C source files in the directory and then link them
@@ -18,8 +20,17 @@ together could be written as follows:
 (This takes advantage of the implicit rule for compiling C programs, so there is
 no need to write explicit rules for compiling the files)
 
+
 4.13 Generating Prerequisites Automatically
 use the ‘-MM’ flag
+
+
+10 Using Implicit Rules
+The built-in implicit rules use several variables in their recipes so
+that, by changing the values of the variables, you can change the way
+the implicit rule works. For example, the variable CFLAGS controls the
+flags given to the C compiler by the implicit rule for C compilation.
+
 
 10.1 Using Implicit Rules
 To allow make to find a customary method for updating a target file, all you
@@ -35,6 +46,7 @@ Because you mention foo.o but do not give a rule for it, make will automatically
 look for an implicit rule that tells how to update it. This happens whether or
 not the file foo.o currently exists.
 
+
 10.2 Catalogue of Built-In Rules
 Compiling C programs:
     $(CC) $(CPPFLAGS) $(CFLAGS) -c
@@ -44,8 +56,21 @@ Compiling C++ programs:
 
 Linking a single object file:
     $(CC) $(LDFLAGS) n.o $(LOADLIBES) $(LDLIBS)
+
 (if there are multiple object files, one of which has a name matching that of
 the executable file)
+
+
+10.5.2 Pattern Rule Examples
+Here are some examples of pattern rules actually predefined in make.
+First, the rule that compiles ‘.c’ files into ‘.o’ files:
+
+    %.o : %.c
+        $(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+
+defines a rule that can make any file x.o from x.c. The recipe uses the
+automatic variables ‘$@’ and ‘$<’ to substitute the names of the target
+file and the source file in each case where the rule applies
 
 ---
 
