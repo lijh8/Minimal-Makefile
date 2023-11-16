@@ -85,7 +85,7 @@ clean : ; -rm -fr *.o *.d main1
 .PHONY : clean
 $
 
-$ cat main1/Makefile
+$ cat main2/Makefile
 # build shared library with -fPIC, -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP -I../foo
@@ -96,9 +96,9 @@ LDLIBS   = -lfoo
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../lib'
 
 # target name is basename of one of the source files
-main1 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+main2 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
-clean : ; -rm -fr *.o *.d main1
+clean : ; -rm -fr *.o *.d main2
 .PHONY : clean
 $
 
