@@ -27,7 +27,7 @@ clean: ; $(RM) *.o *.d main
 
 #
 
-#CFLAGS += -std=c++2a -Wall -Wextra # CXXFLAGS for .cpp
+#CFLAGS += -std=c99 -Wall -Wextra # CXXFLAGS for .cpp
 
 #
 
