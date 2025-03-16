@@ -1,0 +1,73 @@
+# Makefile
+
+# 1. Generating prerequisites automatically for header files
+# 2. Compile source files automatically in current directory
+
+# .
+# ├── f1.c
+# ├── f1.h
+# │── f2.c
+# │── f2.h
+# ├── main.c
+# ├── Makefile
+# └── print_log.h
+
+# build dynamic library with -fPIC -shared
+CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
+CPPFLAGS = -MMD -MP # -I../foo -DNDEBUG
+LDFLAGS  = # -L../foo -shared -static
+LDLIBS   = # -lfoo
+#CC      = $(CXX) # link with CXX for .cpp
+
+# target name is basename of one of the source files
+main: $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+-include *.d
+clean: ; $(RM) *.o *.d main
+.PHONY: clean
+
+#
+
+#CFLAGS += -std=c++2a -Wall -Wextra # CXXFLAGS for .cpp
+
+#
+
+# fully static link archive with -static
+ARFLAGS = rvU
+(%): % ;
+%.a: ; $(AR) $(ARFLAGS) $@ $?
+libfoo.a: libfoo.a($(patsubst %.c,%.o,$(wildcard *.c))) # .cpp
+
+#
+
+# use clang for C program:
+#CC        = clang
+
+# libstdc++ for g++, libc++ for clang++,
+# $ apt install clang llvm lldb libc++-dev libc++abi-dev
+# use clang++ for C++ program: link to libc++ instead of libstdc++,
+#CC        = $(CXX) # link with CXX for .cpp
+#CXX       = clang++
+#CXXFLAGS += -stdlib=libc++
+#LDFLAGS  += -stdlib=libc++
+
+#
+
+# https://github.com/google/sanitizers/issues/1039#issuecomment-453607726 ,
+#   "asan+lsan+ubsan is fine, the rest should run separately."  --kcc, Jan 12, 2019
+
+# address (including leak), undefined behavior sanitizers,
+CFLAGS   += -fsanitize=address -fsanitize=undefined -fsanitize=leak # CXXFLAGS for .cpp
+LDFLAGS  += -fsanitize=address -fsanitize=undefined -fsanitize=leak # CXXFLAGS for .cpp
+
+# thread sanitizer,
+#CFLAGS  += -fsanitize=thread # CXXFLAGS for .cpp
+#LDFLAGS += -fsanitize=thread
+
+# https://github.com/google/sanitizers/issues/1039#issuecomment-453306241 ,
+#   "GCC doesn't have msan at all."  --kcc, Jan 11, 2019
+
+# memory sanitizer, (gcc has no msan. use clang, clang++, if needed)
+#CFLAGS  += -fsanitize=memory -fPIE # CXXFLAGS for .cpp
+#LDFLAGS += -fsanitize=memory -pie
+
+#
