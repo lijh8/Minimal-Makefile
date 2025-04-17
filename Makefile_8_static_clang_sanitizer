@@ -37,6 +37,9 @@ ARFLAGS = rvU
 %.a: ; $(AR) $(ARFLAGS) $@ $?
 libfoo.a: libfoo.a($(patsubst %.c,%.o,$(wildcard *.c))) # .cpp
 
+# keep intermediate .o files even built the archive for the first time
+.SECONDARY: # $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+
 #
 
 # use clang for C program:
