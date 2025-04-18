@@ -27,7 +27,7 @@ clean: ; $(RM) *.o *.d main
 
 #
 
-#CFLAGS += -std=c99 -Wall -Wextra # CXXFLAGS for .cpp
+#CFLAGS += -std=c99 -Wall -Wextra -Wpedantic # CXXFLAGS for .cpp
 
 #
 
@@ -40,7 +40,44 @@ libfoo.a: libfoo.a($(patsubst %.c,%.o,$(wildcard *.c))) # .cpp
 # keep intermediate .o files even built the archive for the first time
 .SECONDARY: # $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
+
 #
+
+
+# timestamp is kept with the U option, or timestamp is reset to 1970/1/1.
+# ARFLAGS = rvU
+# $ ar -tv libfoo.a
+# rw-rw-r-- 1000/1000 78776 Jan 1 23:49 2025 foo.o
+# $
+#
+
+
+# in the traditional way, the object .o files are direct prerequisites:
+#   libfoo.a : bar.o foo.o # yes it works, but it is not the implicit rule for archive.
+#
+# in the archive(member) syntax, the .o files are not direct dependencies:
+#   libfoo.a : libfoo.a(foo.o bar.o) # archive(member) syntax if implicit rule for archive.
+#
+# so when make runs for the first time, the .o files will be deleted.
+# now the libfoo.a exists, the second time make runs,
+# the .o files are referenced like libfoo.a(foo.o), so the .o files are kept.
+
+
+# gcc manual, 3.13 Options Controlling the Preprocessor:
+#
+# 1. -M, generates dependencies for all header files, outputs to stdout;
+# 2. -MM, generates dependencies for user header files, omits system headers;
+# 3. -MD, generates dependencies to `.d` files;
+# 4. -MMD, generates dependencies for user header to `.d` files;
+#
+# 5. -MP, it adds a rule without prerequisites for the header.
+#         when header is deleted but the `#include` directive remains in source code,
+#         this makes the object file depends on a rule or target instead of a deleted file.
+#         to suppress the error in make and brings the error to the `#include` directive in source code.
+#
+#     test.o: test.c test.h
+#     test.h:
+
 
 # use clang for C program:
 #CC        = clang
