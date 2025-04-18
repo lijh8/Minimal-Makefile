@@ -37,7 +37,7 @@ ARFLAGS = rvU
 %.a: ; $(AR) $(ARFLAGS) $@ $?
 libfoo.a: libfoo.a($(patsubst %.c,%.o,$(wildcard *.c))) # .cpp
 
-# keep intermediate .o files even built the archive for the first time
+# do not delete intermediate .o files even when make runs for the first time
 .SECONDARY: # $(patsubst %.cpp,%.o,$(wildcard *.cpp))
 
 
@@ -61,6 +61,7 @@ libfoo.a: libfoo.a($(patsubst %.c,%.o,$(wildcard *.c))) # .cpp
 # so when make runs for the first time, the .o files will be deleted.
 # now the libfoo.a exists, the second time make runs,
 # the .o files are referenced like libfoo.a(foo.o), so the .o files are kept.
+# with ` .SECONDARY: ` the .o files will not be deleted even for the first time.
 
 
 # gcc manual, 3.13 Options Controlling the Preprocessor:
