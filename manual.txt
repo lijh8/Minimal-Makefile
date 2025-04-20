@@ -156,3 +156,53 @@ cc x.o y.o z.o -o x
 $
 
 ---
+
+# recursive expansion happens when the variable is substituted / used.
+
+x = foo
+y = $(x) bar
+x = later
+
+all: ; @echo $(x), $(y)   # expansion of y happens when it is used here
+
+$ make -f a.mk
+later, later bar
+$
+
+
+# simple expansion happens when the variable is defined.
+
+x := foo
+y := $(x) bar            # expansion of y happens when it is defined here
+x := later
+
+all: ; @echo $(x), $(y)
+
+$ make -f a.mk
+later, foo bar
+$
+
+---
+
+# https://www.gnu.org/software/make/manual/make.html#Special-Variables ,
+# make manual: 6.14,
+# it works with both recursive and simple variable expansion .
+
+.RECIPEPREFIX = >
+all:
+> @echo Hello, world
+
+# replace tab with space for recipe prefix.
+# recipe then can be indented by one or more spaces.
+# $(subst ,, ) # this replaces nothing with nothing, so the space remains.
+#
+# this works only with simple variable expansion. it is inconsistent with 6.14.
+# so do not do this.
+
+.RECIPEPREFIX = $(subst ,, )    # err: recursive expansion will not work.
+.RECIPEPREFIX := $(subst ,, )   # ok: simple expansion works.
+
+all:
+   @echo "|$(.RECIPEPREFIX)|"   # it should happen before enter recipe
+
+---
