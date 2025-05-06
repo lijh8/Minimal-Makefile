@@ -18,12 +18,12 @@
 # └── print_log.h
 
 # build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 # -fPIC  # CXXFLAGS for .cpp
-LDFLAGS  = # -L../bar -Wl,-rpath,/foo/bar # -shared
-LDLIBS   = # -lbar
-CPPFLAGS = -MMD -MP # -I../bar
-DIR      = ./.build
-SRC      = $(shell find . -type f -name "*.c")  # .cpp
+CFLAGS   := -g # -O3 # -fPIC  # CXXFLAGS for .cpp
+LDFLAGS  := # -L../bar -Wl,-rpath,/foo/bar # -shared
+LDLIBS   := # -lbar
+CPPFLAGS := -MMD -MP # -I../bar
+DIR      := ./.build
+SRC      := $(shell find . -type f -name "*.c")  # .cpp
 
 $(DIR)/main : $(addprefix $(DIR)/,$(SRC:.c=.o))  # .cpp
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@  # CXX for .cpp

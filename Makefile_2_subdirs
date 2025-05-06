@@ -17,11 +17,11 @@
 # └── print_log.h
 
 # build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 # -fPIC  # CXXFLAGS for .cpp
-LDFLAGS  = # -L../bar -Wl,-rpath,/foo/bar # -shared
-LDLIBS   = # -bar
-CPPFLAGS = -MMD -MP # -I../bar
-#CC      = $(CXX)  # link with CXX for .cpp
+CFLAGS   := -g # -O3 # -fPIC  # CXXFLAGS for .cpp
+LDFLAGS  := # -L../bar -Wl,-rpath,/foo/bar # -shared
+LDLIBS   := # -bar
+CPPFLAGS := -MMD -MP # -I../bar
+#CC      := $(CXX)  # link with CXX for .cpp
 #LDFLAGS += -install_name @rpath/bar # macOS .dylib
 
 # target name is basename of one of the source files

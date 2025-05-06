@@ -13,14 +13,14 @@
 # └── print_log.h
 
 # executable -fPIE -pie and library -fPIC -shared
-CFLAGS   = -g -fPIE # -fPIC -O3 # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP # -I../foo -DNDEBUG
-LDFLAGS  = -pie # -shared -L../foo
-LDLIBS   = # -lfoo
-#CC      = $(CXX) # link with CXX for .cpp
+CFLAGS   := -g -fPIE # -fPIC -O3 # CXXFLAGS for .cpp
+CPPFLAGS := -MMD -MP # -I../foo -DNDEBUG
+LDFLAGS  := -pie # -shared -L../foo
+LDLIBS   := # -lfoo
+#CC      := $(CXX) # link with CXX for .cpp
 
 # target name is basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include $(wildcard *.d)
+-include $(patsubst %.c,%.d,$(wildcard *.c)) # .cpp
 clean : ; -rm -fr *.o *.d main
 .PHONY : clean

@@ -13,15 +13,15 @@
 # └── print_log.h
 
 # build dynamic library with -fPIC -shared
-CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP # -I../foo -DNDEBUG
-LDFLAGS  = # -L../foo -shared -static
-LDLIBS   = # -lfoo
-#CC      = $(CXX) # link with CXX for .cpp
+CFLAGS   := -g # -O3 -fPIC # CXXFLAGS for .cpp
+CPPFLAGS := -MMD -MP # -I../foo -DNDEBUG
+LDFLAGS  := # -L../foo -shared -static
+LDLIBS   := # -lfoo
+#CC      := $(CXX) # link with CXX for .cpp
 
 # target name is basename of one of the source files
 main: $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include $(wildcard *.d)
+-include $(patsubst %.c,%.d,$(wildcard *.c)) # .cpp
 clean: ; $(RM) *.o *.d main
 .PHONY: clean
 
@@ -32,20 +32,20 @@ clean: ; $(RM) *.o *.d main
 #
 
 # fully static link archive with -static
-ARFLAGS = rvU
+ARFLAGS := rvU
 (%): % ;
 %.a: ; $(AR) $(ARFLAGS) $@ $?
 libfoo.a: libfoo.a($(patsubst %.c,%.o,$(wildcard *.c))) # .cpp
 
 # do not delete intermediate .o files even when make runs for the first time
-.SECONDARY: # $(patsubst %.cpp,%.o,$(wildcard *.cpp))
+.SECONDARY: # $(patsubst %.c,%.o,$(wildcard *.c))
 
 
 #
 
 
 # timestamp is kept with the U option, or timestamp is reset to 1970/1/1.
-# ARFLAGS = rvU
+# ARFLAGS := rvU
 # $ ar -tv libfoo.a
 # rw-rw-r-- 1000/1000 78776 Jan 1 23:49 2025 foo.o
 # $
@@ -81,13 +81,13 @@ libfoo.a: libfoo.a($(patsubst %.c,%.o,$(wildcard *.c))) # .cpp
 
 
 # use clang for C program:
-#CC        = clang
+#CC       := clang
 
 # libstdc++ for g++, libc++ for clang++,
 # $ apt install clang llvm lldb libc++-dev libc++abi-dev
 # use clang++ for C++ program: link to libc++ instead of libstdc++,
-#CC        = $(CXX) # link with CXX for .cpp
-#CXX       = clang++
+#CC       := $(CXX) # link with CXX for .cpp
+#CXX      := clang++
 #CXXFLAGS += -stdlib=libc++
 #LDFLAGS  += -stdlib=libc++
 

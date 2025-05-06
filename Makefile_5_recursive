@@ -1,6 +1,6 @@
 $ cat v1
-LIBDIRS = bar foo
-MAINDIRS = main1 main2
+LIBDIRS  := bar foo
+MAINDIRS := main1 main2
 
 all : $(LIBDIRS) $(MAINDIRS)
 foo : bar
@@ -21,7 +21,7 @@ clean :
 $
 
 $ cat v2
-SUBDIRS = bar foo main
+SUBDIRS := bar foo main
 subdirs : $(SUBDIRS)
 $(SUBDIRS) :
 	make -C $@

@@ -1,21 +1,21 @@
 $ cat src/main/Makefile
 # build shared library with -fPIC, -shared
-CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP # -I../foo
-LDFLAGS  = # -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
-LDLIBS   = # -lfoo
-#CC      = $(CXX) # link with CXX for .cpp
+CFLAGS   := -g # -O3 -fPIC # CXXFLAGS for .cpp
+CPPFLAGS := -MMD -MP # -I../foo
+LDFLAGS  := # -L../foo -Wl,-rpath,'$$ORIGIN/../foo' # -shared
+LDLIBS   := # -lfoo
+#CC      := $(CXX) # link with CXX for .cpp
 
 # target name is basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include $(wildcard *.d)
+-include $(patsubst %.c,%.d,$(wildcard *.c)) # .cpp
 clean : ; -rm -fr *.o *.d
 .PHONY : clean
 $
 
 $ cat src/Makefile
-LIBDIRS = bar foo
-MAINDIRS = main1 main2
+LIBDIRS  := bar foo
+MAINDIRS := main1 main2
 
 all : $(LIBDIRS) $(MAINDIRS)
 foo : bar
