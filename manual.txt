@@ -205,4 +205,55 @@ all:
 all:
    @echo "|$(.RECIPEPREFIX)|"   # it should happen before enter recipe
 
+
 ---
+
+
+# https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html ,
+# 4.14 Generating Prerequisites Automatically
+
+
+%.d: %.c
+    @set -e; rm -f $@; \
+        $(CC) -M $(CPPFLAGS) $< > $@.$$$$; \
+        sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+        rm -f $@.$$$$
+
+
+# 1.
+#
+# this put the `.d` file in the target. when a `.d` file is deleted,
+# it will regenerate the `.d` file.
+#
+# main.o        : main.c defs.h
+# main.o main.d : main.c defs.h
+
+
+# 2.
+# https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
+
+Paul Smith:
+I recommend you do not try to use this method for tracking header file
+prerequisites.  Instead, look at this method:
+  https://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ ,
+
+
+-include $(sources:.c=.d)                    # ok
+-include $(patsubst %.c,%.d,$(wildcard *.c)) # ok
+-include $(wildcard *.d)                     # no, do not use wildcard directly
+-include *.d                                 # no, do not use wildcard directly
+
+
+# 3.
+# https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
+
+Q: when do `make clean`, why it triggers the rule for `.d` files?
+
+A:
+Paul Smith:
+Make always tries to rebuild all its included files.  See:
+  https://www.gnu.org/software/make/manual/html_node/Remaking-Makefiles.html ,
+
+
+---
+
