@@ -237,6 +237,8 @@ all:
 # https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
 
 Paul Smith:
+this is an old-fashioned and no longer recommended way to handle prerequisite tracking.
+
 I recommend you do not try to use this method for tracking header file
 prerequisites.  Instead, look at this method:
   https://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ ,
@@ -260,5 +262,13 @@ Make always tries to rebuild all its included files.  See:
   https://www.gnu.org/software/make/manual/html_node/Remaking-Makefiles.html ,
 
 
----
+3.5 How Makefiles Are Remade:
+To this end, after reading in all makefiles make will consider each as a goal target,
 
+3.3 Including Other Makefiles:
+If an included makefile cannot be found in any of these directories it is not an
+immediately fatal error; processing of the makefile containing the include continues.
+Once it has finished reading makefiles,
+make will try to remake any that are out of date or don’t exist.
+
+---
