@@ -80,7 +80,7 @@ LDFLAGS += -Wl,-rpath,'$$ORIGIN/../lib'
 
 # target name is basename of one of the source files
 main1 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
+-include $(wildcard *.d)
 clean : ; -rm -fr *.o *.d main1
 .PHONY : clean
 $
@@ -97,7 +97,7 @@ LDFLAGS += -Wl,-rpath,'$$ORIGIN/../lib'
 
 # target name is basename of one of the source files
 main2 : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
+-include $(wildcard *.d)
 clean : ; -rm -fr *.o *.d main2
 .PHONY : clean
 $
@@ -115,7 +115,7 @@ LDFLAGS += -Wl,-soname,$(soversion)
 
 # target name is basename of one of the source files
 foo : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
+-include $(wildcard *.d)
 clean : ; -rm -fr *.o *.d foo *.so *.so.*
 .PHONY : clean
 $
@@ -132,7 +132,7 @@ LDFLAGS += -Wl,-soname,$(soversion)
 
 # target name is basename of one of the source files
 bar : $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
--include *.d
+-include $(wildcard *.d)
 clean : ; -rm -fr *.o *.d bar *.so *.so.*
 .PHONY : clean
 $

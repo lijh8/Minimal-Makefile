@@ -19,7 +19,7 @@ endif
 
 # target name is basename of one of the source files
 main : $(patsubst %.c,%.o,$(wildcard *.c))  # .cpp
--include *.d
+-include $(wildcard *.d)
 clean : ; -rm -fr *.o *.d
 .PHONY : clean
 
