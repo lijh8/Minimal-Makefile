@@ -222,8 +222,12 @@ all:
 
 # 1.
 #
-# this put the `.d` file in the target. when a `.d` file is deleted,
-# it will regenerate the `.d` file.
+# the `.d` dependency file depends on `.c` source file
+# as stated in makefile with rule ` %.d: %.c `.
+#
+# the sed command puts the `.d` file in the target of both `.c` and `.h` files.
+# this makes `.d` file depend on `.h` files too.
+# it will regenerate the `.d` file even when the header file is changed.
 #
 # main.o        : main.c defs.h
 # main.o main.d : main.c defs.h
@@ -236,6 +240,7 @@ Paul Smith:
 I recommend you do not try to use this method for tracking header file
 prerequisites.  Instead, look at this method:
   https://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ ,
+  ` CPPFLAGS += -MMD -MP `
 
 
 -include $(sources:.c=.d)                    # ok
@@ -247,7 +252,7 @@ prerequisites.  Instead, look at this method:
 # 3.
 # https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
 
-Q: when do `make clean`, why it triggers the rule for `.d` files?
+Q: when do `make clean` twice, why it triggers the rule for `.d` files?
 
 A:
 Paul Smith:
