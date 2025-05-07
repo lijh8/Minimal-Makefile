@@ -72,7 +72,9 @@ defines a rule that can make any file x.o from x.c. The recipe uses the
 automatic variables ‘$@’ and ‘$<’ to substitute the names of the target
 file and the source file in each case where the rule applies
 
+
 ---
+
 
 https://www.gnu.org/software/make/
 
@@ -91,7 +93,9 @@ date, and it does not need to be regenerated. The other target files do need to
 be updated, but in the right order: each target file must be regenerated before
 it is used in regenerating other targets.
 
+
 ---
+
 
 https://www.gnu.org/software/make/manual/make.html
 
@@ -99,7 +103,9 @@ The make program uses the makefile data base and the last-modification times of
 the files to decide which of the files need to be updated. For each of those
 files, it issues the recipes recorded in the data base.
 
+
 ---
+
 
 Example 1:
 
@@ -155,7 +161,9 @@ cc -c -o z.o z.c
 cc x.o y.o z.o -o x
 $
 
+
 ---
+
 
 # recursive expansion happens when the variable is substituted / used.
 
@@ -182,7 +190,9 @@ $ make -f a.mk
 later, foo bar
 $
 
+
 ---
+
 
 # https://www.gnu.org/software/make/manual/make.html#Special-Variables ,
 # make manual: 6.14,
@@ -270,5 +280,64 @@ If an included makefile cannot be found in any of these directories it is not an
 immediately fatal error; processing of the makefile containing the include continues.
 Once it has finished reading makefiles,
 make will try to remake any that are out of date or don’t exist.
+
+
+---
+
+
+# 7.2 Syntax of Conditionals:
+# Extra spaces are allowed and ignored at the beginning of
+# the conditional directive line, but a tab is not allowed.
+
+ifdef NDEBUG
+CPPFLAGS += -DNDEBUG
+CFLAGS += -O3
+else
+CFLAGS += -g
+endif
+
+
+$ cat Makefile
+# do not indent with tab or .RECIPEPREFIX for conditions
+
+ifneq ($(flavor foo),undefined)
+bar := 123
+endif
+
+test:
+	@echo "$(flavor foo) |$(bar)|"
+
+$
+
+$ make test
+undefined ||
+$
+$ make foo= test
+recursive |123|
+$
+
+
+---
+
+
+- pattern rules often use the percentage sign ` % ` to apply to files of
+    some types with a pattern like `%.o : %.c`.
+
+- implicit rules are builtin rules provided by the make tool itself.
+    implicit rules are often pattern rules too,
+    so it applies to many files of the type.
+
+- explicit rules are written in the makefile explictily.
+    it can be a pattern rule if it contains `%`, or non-pattern rule.
+
+
+---
+
+
+# check builtin variables in make
+
+$ make -p | grep -E '^[A-Za-z0-9_-]+ :?=' | vi -
+
+
 
 ---

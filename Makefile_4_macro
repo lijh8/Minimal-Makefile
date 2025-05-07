@@ -9,7 +9,12 @@ CPPFLAGS := -MMD -MP # -I../hello
 
 all: main
 
+# 7.2 Syntax of Conditionals:
+# Extra spaces are allowed and ignored at the beginning of
+# the conditional directive line, but a tab is not allowed.
+
 # turn off assert() with NDEBUG
+
 ifdef NDEBUG
 CPPFLAGS += -DNDEBUG
 CFLAGS += -O3
