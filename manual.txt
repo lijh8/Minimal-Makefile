@@ -2,14 +2,21 @@ https://www.gnu.org/software/make/manual/make.pdf
 January 2020
 
 
-2.5 Letting make Deduce the Recipes
+---
+part 1:
+---
+
+
+2.5 Letting make Deduce the Recipes:
+
 It is not necessary to spell out the recipes for compiling the individual C
 source files, because make can figure them out: it has an implicit rule for
 updating a ‘.o’ file from a correspondingly named ‘.c’ file using a ‘cc -c’
 command.
 
 
-4.3.3 The Function wildcard
+4.3.3 The Function wildcard:
+
 a makefile to compile all C source files in the directory and then link them
 together could be written as follows:
 
@@ -21,18 +28,21 @@ together could be written as follows:
 no need to write explicit rules for compiling the files)
 
 
-4.13 Generating Prerequisites Automatically
+4.13 Generating Prerequisites Automatically:
+
 use the ‘-MM’ flag
 
 
-10 Using Implicit Rules
+10 Using Implicit Rules:
+
 The built-in implicit rules use several variables in their recipes so
 that, by changing the values of the variables, you can change the way
 the implicit rule works. For example, the variable CFLAGS controls the
 flags given to the C compiler by the implicit rule for C compilation.
 
 
-10.1 Using Implicit Rules
+10.1 Using Implicit Rules:
+
 To allow make to find a customary method for updating a target file, all you
 have to do is refrain from specifying recipes yourself. Either write a rule with
 no recipe, or don’t write a rule at all. Then make will figure out which
@@ -47,7 +57,8 @@ look for an implicit rule that tells how to update it. This happens whether or
 not the file foo.o currently exists.
 
 
-10.2 Catalogue of Built-In Rules
+10.2 Catalogue of Built-In Rules:
+
 Compiling C programs:
     $(CC) $(CPPFLAGS) $(CFLAGS) -c
 
@@ -61,7 +72,8 @@ Linking a single object file:
 the executable file)
 
 
-10.5.2 Pattern Rule Examples
+10.5.2 Pattern Rule Examples:
+
 Here are some examples of pattern rules actually predefined in make.
 First, the rule that compiles ‘.c’ files into ‘.o’ files:
 
@@ -92,9 +104,6 @@ If a target file is newer than all of its dependencies, then it is already up to
 date, and it does not need to be regenerated. The other target files do need to
 be updated, but in the right order: each target file must be regenerated before
 it is used in regenerating other targets.
-
-
----
 
 
 https://www.gnu.org/software/make/manual/make.html
@@ -162,6 +171,8 @@ cc x.o y.o z.o -o x
 $
 
 
+---
+part 2:
 ---
 
 
@@ -273,13 +284,60 @@ Make always tries to rebuild all its included files.  See:
 
 
 3.5 How Makefiles Are Remade:
+
 To this end, after reading in all makefiles make will consider each as a goal target,
 
 3.3 Including Other Makefiles:
+
 If an included makefile cannot be found in any of these directories it is not an
 immediately fatal error; processing of the makefile containing the include continues.
 Once it has finished reading makefiles,
 make will try to remake any that are out of date or don’t exist.
+
+
+---
+
+
+#
+# 1. makefile is line oriented:
+#   in rule, targets : prerequisites are separated by colon on same line.
+#   in rule, recipes are command lines.
+#
+# 2. makefile variable values are text.
+#
+
+2.1 What a Rule Looks Like:
+
+A recipe, either on the same line or each on its own line.
+
+A makefile may contain other text besides rules,
+
+
+2.4 Variables Make Makefiles Simpler:
+
+Variables allow a text string to be defined once and substituted in multiple places later.
+
+
+3.1 What Makefiles Contain:
+
+An explicit rule says when and how to remake one or more files,
+called the rule’s targets. It lists the other files that the targets depend on,
+called the prerequisites of the target,
+and may also give a recipe to use to create or update the targets.
+
+A variable definition is a line,
+
+
+3.3 Including Other Makefiles:
+
+The directive is a line,
+
+  include filenames...
+
+
+4.13 Double-Colon Rules:
+
+Double-colon rules are explicit rules written with ‘::’ instead of ‘:’ after the target names.
 
 
 ---
@@ -302,6 +360,7 @@ trailing space characters are not stripped from variable values,
 
 
 # 7.2 Syntax of Conditionals:
+
 # Extra spaces are allowed and ignored at the beginning of
 # the conditional directive line, but a tab is not allowed.
 
@@ -353,7 +412,6 @@ $
 # check builtin variables in make
 
 $ make -p | grep -E '^[A-Za-z0-9_-]+ :?=' | vi -
-
 
 
 ---
