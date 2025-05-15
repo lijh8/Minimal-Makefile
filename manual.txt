@@ -285,6 +285,22 @@ make will try to remake any that are out of date or don’t exist.
 ---
 
 
+6.1 Basics of Variable References:
+
+spaces before the variable value are ignored in variable assignments,
+
+
+6.2.2 Simply Expanded Variable Assignment:
+
+Leading whitespace characters are discarded from your input before substitution
+of variable references and function calls;
+
+trailing space characters are not stripped from variable values,
+
+
+---
+
+
 # 7.2 Syntax of Conditionals:
 # Extra spaces are allowed and ignored at the beginning of
 # the conditional directive line, but a tab is not allowed.
