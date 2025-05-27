@@ -256,6 +256,7 @@ all:
 
 # 2.
 # https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
+# why make clean triggers other rules:
 
 Paul Smith:
 this is an old-fashioned and no longer recommended way to handle prerequisite tracking.
@@ -293,6 +294,37 @@ If an included makefile cannot be found in any of these directories it is not an
 immediately fatal error; processing of the makefile containing the include continues.
 Once it has finished reading makefiles,
 make will try to remake any that are out of date or don’t exist.
+
+
+---
+
+
+Paul Smith:
+
+https://lists.gnu.org/archive/html/bug-make/2022-08/msg00030.html ,
+> Implicit rule for linking multiple object files:
+>
+>     x: y.o z.o x.o  # with x.o
+>
+
+It is correct to do this.
+
+These two rules do not behave exactly the same:
+
+  x: y.o z.o
+
+versus
+
+  x: y.o z.o x.o
+
+(you can see the difference for yourself by running "make" both ways)
+but the result of both of these will give you the same working program.
+
+> Is it correct for me to use patsubst function to include all object
+> files?
+>     x: $(patsubst %.c,%.o,$(wildcard *.c))
+
+This is fine too.
 
 
 ---
