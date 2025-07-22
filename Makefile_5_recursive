@@ -1,4 +1,32 @@
+# recursive makefile
+# parallel job execution with ` make -j `
+#
+# specify the dependencies of targets
+# so it can work with parallel execution properly
+#
+# main : foo bar baz
+# foo : bar
+
+
 $ cat v1
+all : main foo
+main : foo
+
+foo :
+	@$(MAKE) -C $@
+	@cp $@/$@ $@/lib$@.so
+main :
+	@$(MAKE) -C $@
+
+clean :
+	@for dir in main foo; do \
+		$(MAKE) -C $$dir $@; \
+	done
+.PHONY : all clean main foo
+$
+
+
+$ cat v2
 LIBDIRS  := bar foo
 MAINDIRS := main1 main2
 
@@ -20,7 +48,8 @@ clean :
 .PHONY : $(LIBDIRS) $(MAINDIRS) all clean
 $
 
-$ cat v2
+
+$ cat v3
 SUBDIRS := bar foo main
 subdirs : $(SUBDIRS)
 $(SUBDIRS) :

@@ -447,3 +447,16 @@ $ make -p | grep -E '^[A-Za-z0-9_-]+ :?=' | vi -
 
 
 ---
+
+
+https://www.gnu.org/software/make/manual/make.html#Parallel-Disable ,
+
+5.4.1 Disabling Parallel Execution
+
+If a makefile completely and accurately defines the dependency relationships
+between all of its targets, then make will correctly build the goals regardless
+of whether parallel execution is enabled or not. This is the ideal way to write
+makefiles.
+
+
+---
