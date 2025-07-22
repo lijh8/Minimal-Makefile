@@ -458,5 +458,8 @@ between all of its targets, then make will correctly build the goals regardless
 of whether parallel execution is enabled or not. This is the ideal way to write
 makefiles.
 
+main : foo bar baz
+foo : bar
+
 
 ---
