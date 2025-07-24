@@ -2,11 +2,6 @@ https://www.gnu.org/software/make/manual/make.pdf
 January 2020
 
 
----
-part 1:
----
-
-
 2.5 Letting make Deduce the Recipes:
 
 It is not necessary to spell out the recipes for compiling the individual C
@@ -169,11 +164,6 @@ cc -c -o y.o y.c
 cc -c -o z.o z.c
 cc x.o y.o z.o -o x
 $
-
-
----
-part 2:
----
 
 
 # recursive expansion happens when the variable is substituted / used.
@@ -483,6 +473,67 @@ runtime:
 the soname libfoo.so.1 in executable a.out is examined,
 libfoo.so.1 links to libfoo.so.1.2.3;
 the actual library file is loaded with the executable;
+
+
+---
+
+
+5.7 Recursive Use of make
+
+Recursive use of make means using make as a command in a makefile.
+
+
+---
+
+
+5.7.2 Communicating Variables to a Sub-make
+
+Except by explicit request, make exports a variable only if it is either defined
+in the environment initially, or if set on the command line and its name
+consists only of letters, numbers, and underscores.
+
+make automatically passes down variable values that were defined on the command
+line, by putting them in the MAKEFLAGS variable. See Communicating Options to a
+Sub-make.
+
+$ cat Makefile
+all:
+	@echo "foo: $(foo)"
+	@echo "foo2: $(foo2)"
+	@echo "MAKEFLAGS: $(MAKEFLAGS)"
+$
+$	make foo=bar foo2=bar2
+foo: bar
+foo2: bar2
+MAKEFLAGS:  -- foo2=bar2 foo=bar
+$
+
+
+---
+
+
+6.10 Variables from the Environment
+
+However, an explicit assignment in the makefile, or with a command argument,
+overrides the environment. (If the ‘-e’ flag is specified, then values from the
+environment override assignments in the makefile. See Summary of Options. But
+this is not recommended practice.)
+
+By default, only variables that came from the make’s environment or set on its
+command line are placed into the environment of the commands. You can use the
+export directive to pass other variables.
+
+$ cat Makefile
+all:
+	@echo "foo: $(foo)"
+	@echo "foo2: $(foo2)"
+	@echo "MAKEFLAGS: $(MAKEFLAGS)"
+$
+$	make foo=bar foo2=bar2
+foo: bar
+foo2: bar2
+MAKEFLAGS:  -- foo2=bar2 foo=bar
+$
 
 
 ---
