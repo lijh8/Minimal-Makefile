@@ -463,3 +463,26 @@ foo : bar
 
 
 ---
+
+
+libfoo.so    # symbolic link;
+libfoo.so.1  # symbolic link;
+libfoo.1.2.3 # actual library file;
+
+$ g++ -L../foo -lfoo -o a.out
+
+compile time:
+linker looks for libfoo.so for option ` -lfoo `;
+libfoo.so links to libfoo.so.1;
+libfoo.so.1 links to libfoo.so.1.2.3 which is the actual library file;
+the soname libfoo.so.1 in actual library file is recorded in executable a.out;
+
+$ LD_LIBRARY_PATH=../foo ./a.out
+
+runtime:
+the soname libfoo.so.1 in executable a.out is examined,
+libfoo.so.1 links to libfoo.so.1.2.3;
+the actual library file is loaded with the executable;
+
+
+---

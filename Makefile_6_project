@@ -13,26 +13,23 @@ clean : ; -rm -fr *.o *.d
 .PHONY : clean
 $
 
+# top level recursive makefile
+
 $ cat src/Makefile
-LIBDIRS  := bar foo
-MAINDIRS := main1 main2
+all : main foo
+main : foo
 
-all : $(LIBDIRS) $(MAINDIRS)
-foo : bar
-main1 : foo
-main2 : foo
+foo :
+	@$(MAKE) -C $@
+	@cp $@/$@ $@/lib$@.so
+main :
+	@$(MAKE) -C $@
 
-$(MAINDIRS) : $(LIBDIRS)
-$(LIBDIRS) :
-	$(MAKE) -C $@
-	cp $@/$@ $@/lib$@.so
-$(MAINDIRS) :
-	$(MAKE) -C $@
 clean :
-	for dir in $(LIBDIRS) $(MAINDIRS); do \
+	@for dir in main foo; do \
 		$(MAKE) -C $$dir $@; \
 	done
-.PHONY : $(LIBDIRS) $(MAINDIRS) all clean
+.PHONY : all clean main foo
 $
 
 $ cat .vscode/launch.json

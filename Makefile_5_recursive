@@ -1,4 +1,4 @@
-# recursive makefile
+# top level recursive makefile
 # parallel job execution with ` make -j `
 #
 # specify the dependencies of targets
