@@ -1,6 +1,10 @@
 # Makefile with soname and symbolic links
 # Makefile with rpath for build and install
 
+# $ objdump -p foo/libfoo.so  | grep -i soname
+#   SONAME               libfoo.so.1
+# $
+
 $ ls
 bar  foo  main1  main2  Makefile
 $
@@ -28,11 +32,12 @@ $ cat Makefile
 # semantic version: major.minor.patch
 # $(call make_soname,1.2.3)
 define make_soname # semver
-	@$(MAKE) -C $@ soname=lib$@.so.$(firstword $(subst ., ,$(1)))
+	$(eval soname = lib$@.so.$(firstword $(subst ., ,$(1))))
+	@$(MAKE) -C $@ soname=$(soname)
 	@cp $@/$@ $@/lib$@.so.$(1)
 	@( cd $@; \
-	ln -f -s lib$@.so.$(1) lib$@.so.$(firstword $(subst ., ,$(1))); \
-	ln -f -s lib$@.so.$(firstword $(subst ., ,$(1))) lib$@.so; )
+	ln -f -s lib$@.so.$(1) $(soname); \
+	ln -f -s $(soname) lib$@.so; )
 endef
 
 libdirs = bar foo

@@ -33,11 +33,12 @@ $
 
 $ cat v2
 define make_soname # semver
-	@$(MAKE) -C $@ soname=lib$@.so.$(firstword $(subst ., ,$(1)))
+	$(eval soname = lib$@.so.$(firstword $(subst ., ,$(1))))
+	@$(MAKE) -C $@ soname=$(soname)
 	@cp $@/$@ $@/lib$@.so.$(1)
 	@( cd $@; \
-	ln -f -s lib$@.so.$(1) lib$@.so.$(firstword $(subst ., ,$(1))); \
-	ln -f -s lib$@.so.$(firstword $(subst ., ,$(1))) lib$@.so; )
+	ln -f -s lib$@.so.$(1) $(soname); \
+	ln -f -s $(soname) lib$@.so; )
 endef
 
 libdirs = foo
@@ -59,47 +60,4 @@ clean :
 		$(MAKE) -C $$dir $@; \
 	done
 .PHONY : all clean install $(libdirs) $(maindirs)
-$
-
-
-$ cat v3
-LIBDIRS  := bar foo
-MAINDIRS := main1 main2
-
-all : $(LIBDIRS) $(MAINDIRS)
-foo : bar
-main1 : foo
-main2 : foo
-
-$(MAINDIRS) : $(LIBDIRS)
-$(LIBDIRS) :
-	$(MAKE) -C $@
-	cp $@/$@ $@/lib$@.so
-$(MAINDIRS) :
-	$(MAKE) -C $@
-clean :
-	for dir in $(LIBDIRS) $(MAINDIRS); do \
-		$(MAKE) -C $$dir $@; \
-	done
-.PHONY : $(LIBDIRS) $(MAINDIRS) all clean
-$
-
-
-$ cat v4
-SUBDIRS := bar foo main
-subdirs : $(SUBDIRS)
-$(SUBDIRS) :
-	make -C $@
-	cp $@/$@ $@/lib$@.so
-clean :
-	for dir in $(SUBDIRS); do \
-		make -C $$dir $@; \
-	done
-.PHONY : $(SUBDIRS) subdirs clean
-
-main :
-	make -C $@
-
-main : foo
-foo : bar
 $
