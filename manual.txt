@@ -1,83 +1,79 @@
+GNU make
+
 https://www.gnu.org/software/make/manual/make.pdf
-January 2020
 
 
-2.5 Letting make Deduce the Recipes:
-
-It is not necessary to spell out the recipes for compiling the individual C
-source files, because make can figure them out: it has an implicit rule for
-updating a ‘.o’ file from a correspondingly named ‘.c’ file using a ‘cc -c’
-command.
+---
 
 
-4.3.3 The Function wildcard:
-
-a makefile to compile all C source files in the directory and then link them
-together could be written as follows:
-
-    objects := $(patsubst %.c,%.o,$(wildcard *.c))
-    foo : $(objects)
-        cc -o foo $(objects)
-
-(This takes advantage of the implicit rule for compiling C programs, so there is
-no need to write explicit rules for compiling the files)
+makefile is line oriented.
+targets : prerequisites are separated by colon on same line.
+recipes are command lines.
+makefile variable values are text.
 
 
-4.13 Generating Prerequisites Automatically:
-
-use the ‘-MM’ flag
+---
 
 
-10 Using Implicit Rules:
+pattern rules often use the percentage sign ` % ` to apply to files of
+some types with a pattern like `%.o : %.c`.
 
-The built-in implicit rules use several variables in their recipes so
-that, by changing the values of the variables, you can change the way
-the implicit rule works. For example, the variable CFLAGS controls the
-flags given to the C compiler by the implicit rule for C compilation.
+implicit rules are builtin rules provided by the make tool itself.
+implicit rules are often pattern rules too,
+so it applies to all files of the type.
 
-
-10.1 Using Implicit Rules:
-
-To allow make to find a customary method for updating a target file, all you
-have to do is refrain from specifying recipes yourself. Either write a rule with
-no recipe, or don’t write a rule at all. Then make will figure out which
-implicit rule to use based on which kind of source file exists or can be made.
-For example, suppose the makefile looks like this:
-
-    foo : foo.o bar.o
-        cc -o foo foo.o bar.o $(CFLAGS) $(LDFLAGS)
-
-Because you mention foo.o but do not give a rule for it, make will automatically
-look for an implicit rule that tells how to update it. This happens whether or
-not the file foo.o currently exists.
+explicit rules are written in the makefile explictily.
+it can be a pattern rule if it contains `%`, or a non-pattern rule.
 
 
-10.2 Catalogue of Built-In Rules:
-
-Compiling C programs:
-    $(CC) $(CPPFLAGS) $(CFLAGS) -c
-
-Compiling C++ programs:
-    $(CXX) $(CPPFLAGS) $(CXXFLAGS) -c
-
-Linking a single object file:
-    $(CC) $(LDFLAGS) n.o $(LOADLIBES) $(LDLIBS)
-
-(if there are multiple object files, one of which has a name matching that of
-the executable file)
+---
 
 
-10.5.2 Pattern Rule Examples:
+check builtin variables in make
 
-Here are some examples of pattern rules actually predefined in make.
-First, the rule that compiles ‘.c’ files into ‘.o’ files:
+$ make -p | grep -E '^[A-Za-z0-9_-]+ :?=' | vi -
 
-    %.o : %.c
-        $(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
 
-defines a rule that can make any file x.o from x.c. The recipe uses the
-automatic variables ‘$@’ and ‘$<’ to substitute the names of the target
-file and the source file in each case where the rule applies
+---
+
+
+libfoo.so     ->  # symbolic link;
+libfoo.so.1   ->  # symbolic link, soname;
+libfoo.1.2.3      # actual library file;
+
+
+1. build shared object:
+
+encode the soname in the actual library file libfoo.so.1.2.3:
+  LDFLAGS += -Wl,-soname,libfoo.so.1
+
+create symbolic links ;
+
+$ objdump -p foo/libfoo.so  | grep -i soname
+   SONAME               libfoo.so.1
+$
+
+
+2. compile time, link to shared object:
+
+$ g++ -L../foo -lfoo -o a.out
+
+linker looks for libfoo.so for option ` -lfoo `;
+libfoo.so links to libfoo.so.1;
+libfoo.so.1 links to libfoo.so.1.2.3;
+the soname libfoo.so.1 in actual library file is recorded in executable a.out;
+
+$ LD_LIBRARY_PATH=foo ldd ./main/main
+        libfoo.so.1 => foo/libfoo.so.1 (0x00007f3777524000)
+$
+
+
+3. runtime:
+
+$ LD_LIBRARY_PATH=../foo ./a.out
+
+the soname libfoo.so.1 in executable a.out is examined,
+libfoo.so.1 links to libfoo.so.1.2.3;
 
 
 ---
@@ -113,7 +109,7 @@ files, it issues the recipes recorded in the data base.
 
 Example 1:
 
-# an empty makefile
+an empty makefile
 
 $ cat Makefile
 $
@@ -123,7 +119,7 @@ $
 
 Example 2:
 
-# a rule without prerequisites and recipes, which just mentions the target
+a rule without prerequisites and recipes, which just mentions the target
 
 $ cat Makefile
 x:  # target name is basename of the source file
@@ -166,7 +162,7 @@ cc x.o y.o z.o -o x
 $
 
 
-# recursive expansion happens when the variable is substituted / used.
+recursive expansion happens when the variable is substituted / used.
 
 x = foo
 y = $(x) bar
@@ -179,7 +175,7 @@ later, later bar
 $
 
 
-# simple expansion happens when the variable is defined.
+simple expansion happens when the variable is defined.
 
 x := foo
 y := $(x) bar            # expansion of y happens when it is defined here
@@ -195,34 +191,117 @@ $
 ---
 
 
-# https://www.gnu.org/software/make/manual/make.html#Special-Variables ,
-# make manual: 6.14,
-# it works with both recursive and simple variable expansion .
+2.1 What a Rule Looks Like
 
-.RECIPEPREFIX = >
-all:
-> @echo Hello, world
+A recipe, either on the same line or each on its own line.
 
-# replace tab with space for recipe prefix.
-# recipe then can be indented by one or more spaces.
-# $(subst ,, ) # this replaces nothing with nothing, so the space remains.
-#
-# this works only with simple variable expansion. it is inconsistent with 6.14.
-# so do not do this.
-
-.RECIPEPREFIX = $(subst ,, )    # err: recursive expansion will not work.
-.RECIPEPREFIX := $(subst ,, )   # ok: simple expansion works.
-
-all:
-   @echo "|$(.RECIPEPREFIX)|"   # it should happen before enter recipe
+A makefile may contain other text besides rules,
 
 
 ---
 
 
-# https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html ,
-# 4.14 Generating Prerequisites Automatically
+2.4 Variables Make Makefiles Simpler
 
+Variables allow a text string to be defined once and substituted in multiple
+places later.
+
+
+---
+
+
+2.5 Letting make Deduce the Recipes
+
+It is not necessary to spell out the recipes for compiling the individual C
+source files, because make can figure them out: it has an implicit rule for
+updating a ‘.o’ file from a correspondingly named ‘.c’ file using a ‘cc -c’
+command.
+
+
+---
+
+
+3.1 What Makefiles Contain
+
+An explicit rule says when and how to remake one or more files,
+called the rule’s targets. It lists the other files that the targets depend on,
+called the prerequisites of the target,
+and may also give a recipe to use to create or update the targets.
+
+A variable definition is a line,
+
+
+---
+
+
+3.3 Including Other Makefiles
+
+The directive is a line,
+
+  include filenames...
+
+If an included makefile cannot be found in any of these directories it is not an
+immediately fatal error; processing of the makefile containing the include
+continues. Once it has finished reading makefiles,
+make will try to remake any that are out of date or don’t exist.
+
+
+---
+
+
+3.5 How Makefiles Are Remade
+
+To this end, after reading in all makefiles make will consider each as a goal
+target,
+
+
+---
+
+
+4.3.3 The Function wildcard
+
+a makefile to compile all C source files in the directory and then link them
+together could be written as follows:
+
+    objects := $(patsubst %.c,%.o,$(wildcard *.c))
+    foo : $(objects)
+        cc -o foo $(objects)
+
+(This takes advantage of the implicit rule for compiling C programs, so there is
+no need to write explicit rules for compiling the files)
+
+
+---
+
+
+4.11 Multiple Rules for One Target
+
+Another wrinkle is that the additional prerequisites could be specified with a
+variable that you set with a command line argument to make (see Overriding
+Variables). For example,
+
+  extradeps=
+  $(objects) : $(extradeps)
+
+means that the command ‘make extradeps=foo.h’ will consider foo.h as a
+prerequisite of each object file, but plain ‘make’ will not.
+
+
+---
+
+
+4.13 Double-Colon Rules
+
+Double-colon rules are explicit rules written with ‘::’ instead of ‘:’ after the
+target names.
+
+
+---
+
+
+4.14 Generating Prerequisites Automatically
+
+use the ‘-MM’ flag
 
 %.d: %.c
     @set -e; rm -f $@; \
@@ -231,31 +310,32 @@ all:
         rm -f $@.$$$$
 
 
-# 1.
-#
-# the `.d` dependency file depends on `.c` source file
-# as stated in makefile with rule ` %.d: %.c `.
-#
-# the sed command puts the `.d` file in the target of both `.c` and `.h` files.
-# this makes `.d` file depend on `.h` files too.
-# it will regenerate the `.d` file even when the header file is changed.
-#
-# main.o        : main.c defs.h
-# main.o main.d : main.c defs.h
+1.
+
+the `.d` dependency file depends on `.c` source file
+as stated in makefile with rule ` %.d: %.c `.
+
+the sed command puts the `.d` file in the target of both `.c` and `.h` files.
+this makes `.d` file depend on `.h` files too.
+it will regenerate the `.d` file even when the header file is changed.
+
+main.o        : main.c defs.h
+main.o main.d : main.c defs.h
 
 
-# 2.
-# https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
-# why make clean triggers other rules:
+2.
+
+https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
+why make clean triggers other rules:
 
 Paul Smith:
-this is an old-fashioned and no longer recommended way to handle prerequisite tracking.
+this is an old-fashioned and no longer recommended way to handle prerequisite
+tracking.
 
 I recommend you do not try to use this method for tracking header file
 prerequisites.  Instead, look at this method:
   https://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ ,
   ` CPPFLAGS += -MMD -MP `
-
 
 -include $(sources:.c=.d)                    # ok
 -include $(patsubst %.c,%.d,$(wildcard *.c)) # ok
@@ -263,34 +343,19 @@ prerequisites.  Instead, look at this method:
 -include *.d                                 # no, do not use wildcard directly
 
 
-# 3.
-# https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
+3.
+
+https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
 
 Q: when do `make clean` twice, why it triggers the rule for `.d` files?
 
 A:
+
 Paul Smith:
 Make always tries to rebuild all its included files.  See:
   https://www.gnu.org/software/make/manual/html_node/Remaking-Makefiles.html ,
 
-
-3.5 How Makefiles Are Remade:
-
-To this end, after reading in all makefiles make will consider each as a goal target,
-
-3.3 Including Other Makefiles:
-
-If an included makefile cannot be found in any of these directories it is not an
-immediately fatal error; processing of the makefile containing the include continues.
-Once it has finished reading makefiles,
-make will try to remake any that are out of date or don’t exist.
-
-
----
-
-
 Paul Smith:
-
 https://lists.gnu.org/archive/html/bug-make/2022-08/msg00030.html ,
 > Implicit rule for linking multiple object files:
 >
@@ -320,127 +385,6 @@ This is fine too.
 ---
 
 
-#
-# 1. makefile is line oriented:
-#   in rule, targets : prerequisites are separated by colon on same line.
-#   in rule, recipes are command lines.
-#
-# 2. makefile variable values are text.
-#
-
-2.1 What a Rule Looks Like:
-
-A recipe, either on the same line or each on its own line.
-
-A makefile may contain other text besides rules,
-
-
-2.4 Variables Make Makefiles Simpler:
-
-Variables allow a text string to be defined once and substituted in multiple places later.
-
-
-3.1 What Makefiles Contain:
-
-An explicit rule says when and how to remake one or more files,
-called the rule’s targets. It lists the other files that the targets depend on,
-called the prerequisites of the target,
-and may also give a recipe to use to create or update the targets.
-
-A variable definition is a line,
-
-
-3.3 Including Other Makefiles:
-
-The directive is a line,
-
-  include filenames...
-
-
-4.13 Double-Colon Rules:
-
-Double-colon rules are explicit rules written with ‘::’ instead of ‘:’ after the target names.
-
-
----
-
-
-6.1 Basics of Variable References:
-
-spaces before the variable value are ignored in variable assignments,
-
-
-6.2.2 Simply Expanded Variable Assignment:
-
-Leading whitespace characters are discarded from your input before substitution
-of variable references and function calls;
-
-trailing space characters are not stripped from variable values,
-
-
----
-
-
-# 7.2 Syntax of Conditionals:
-
-# Extra spaces are allowed and ignored at the beginning of
-# the conditional directive line, but a tab is not allowed.
-
-ifdef NDEBUG
-CPPFLAGS += -DNDEBUG
-CFLAGS += -O3
-else
-CFLAGS += -g
-endif
-
-
-$ cat Makefile
-# do not indent with tab or .RECIPEPREFIX for conditions
-
-ifneq ($(flavor foo),undefined)
-bar := 123
-endif
-
-test:
-	@echo "$(flavor foo) |$(bar)|"
-
-$
-
-$ make test
-undefined ||
-$
-$ make foo= test
-recursive |123|
-$
-
-
----
-
-
-- pattern rules often use the percentage sign ` % ` to apply to files of
-    some types with a pattern like `%.o : %.c`.
-
-- implicit rules are builtin rules provided by the make tool itself.
-    implicit rules are often pattern rules too,
-    so it applies to many files of the type.
-
-- explicit rules are written in the makefile explictily.
-    it can be a pattern rule if it contains `%`, or non-pattern rule.
-
-
----
-
-
-# check builtin variables in make
-
-$ make -p | grep -E '^[A-Za-z0-9_-]+ :?=' | vi -
-
-
----
-
-
-https://www.gnu.org/software/make/manual/make.html#Parallel-Disable ,
-
 5.4.1 Disabling Parallel Execution
 
 If a makefile completely and accurately defines the dependency relationships
@@ -450,29 +394,6 @@ makefiles.
 
 main : foo bar baz
 foo : bar
-
-
----
-
-
-libfoo.so    # symbolic link;
-libfoo.so.1  # symbolic link;
-libfoo.1.2.3 # actual library file;
-
-$ g++ -L../foo -lfoo -o a.out
-
-compile time:
-linker looks for libfoo.so for option ` -lfoo `;
-libfoo.so links to libfoo.so.1;
-libfoo.so.1 links to libfoo.so.1.2.3 which is the actual library file;
-the soname libfoo.so.1 in actual library file is recorded in executable a.out;
-
-$ LD_LIBRARY_PATH=../foo ./a.out
-
-runtime:
-the soname libfoo.so.1 in executable a.out is examined,
-libfoo.so.1 links to libfoo.so.1.2.3;
-the actual library file is loaded with the executable;
 
 
 ---
@@ -508,6 +429,34 @@ foo2: bar2
 MAKEFLAGS:  -- foo2=bar2 foo=bar
 $
 
+---
+
+
+6.1 Basics of Variable References
+
+spaces before the variable value are ignored in variable assignments,
+
+
+---
+
+
+6.2.2 Simply Expanded Variable Assignment
+
+Leading whitespace characters are discarded from your input before substitution
+of variable references and function calls;
+
+trailing space characters are not stripped from variable values,
+
+
+---
+
+
+6.8 Defining Multi-Line Variables
+
+If you want variable definitions made with define to take precedence over
+command-line variable definitions, you can use the override directive together
+with define,
+
 
 ---
 
@@ -534,6 +483,156 @@ foo: bar
 foo2: bar2
 MAKEFLAGS:  -- foo2=bar2 foo=bar
 $
+
+
+---
+
+
+6.14 Other Special Variables
+
+it works with both recursive and simple variable expansion .
+
+.RECIPEPREFIX = >
+all:
+> @echo Hello, world
+
+replace tab with space for recipe prefix.
+recipe then can be indented by one or more spaces.
+$(subst ,, ) # this replaces nothing with nothing, so the space remains.
+
+this works only with simple variable expansion. it is inconsistent with 6.14.
+so do not do this.
+
+.RECIPEPREFIX = $(subst ,, )    # err: recursive expansion will not work.
+.RECIPEPREFIX := $(subst ,, )   # ok: simple expansion works.
+
+all:
+   @echo "|$(.RECIPEPREFIX)|"   # it should happen before enter recipe
+
+
+---
+
+
+7.2 Syntax of Conditionals
+
+Extra spaces are allowed and ignored at the beginning of
+the conditional directive line, but a tab is not allowed.
+
+ifdef NDEBUG
+CPPFLAGS += -DNDEBUG
+CFLAGS += -O3
+else
+CFLAGS += -g
+endif
+
+$ cat Makefile
+
+do not indent with tab or .RECIPEPREFIX for conditions
+
+ifneq ($(flavor foo),undefined)
+bar := 123
+endif
+
+test:
+	@echo "$(flavor foo) |$(bar)|"
+
+$
+
+$ make test
+undefined ||
+$
+$ make foo= test
+recursive |123|
+$
+
+
+---
+
+
+9.5 Overriding Variables
+
+An argument that contains ‘=’ specifies the value of a variable: ‘v=x’ sets the
+value of the variable v to x. If you specify a value in this way, all ordinary
+assignments of the same variable in the makefile are ignored; we say they have
+been overridden by the command line argument.
+
+For example, if you say ‘make CFLAGS='-g -O'’, each C compilation will be done
+with ‘cc -c -g -O’.
+
+You can also program the makefile to look at additional variables of your own,
+giving the user the ability to control other aspects of how the makefile works
+by changing the variables.
+
+When you override a variable with a command line argument, you can define either
+a recursively-expanded variable or a simply-expanded variable. The examples
+shown above make a recursively-expanded variable; to make a simply-expanded
+variable, write ‘:=’ or ‘::=’ instead of ‘=’. But, unless you want to include a
+variable reference or function call in the value that you specify, it makes no
+difference which kind of variable you create.
+
+
+---
+
+
+10 Using Implicit Rules
+
+The built-in implicit rules use several variables in their recipes so
+that, by changing the values of the variables, you can change the way
+the implicit rule works. For example, the variable CFLAGS controls the
+flags given to the C compiler by the implicit rule for C compilation.
+
+
+---
+
+
+10.1 Using Implicit Rules
+
+To allow make to find a customary method for updating a target file, all you
+have to do is refrain from specifying recipes yourself. Either write a rule with
+no recipe, or don’t write a rule at all. Then make will figure out which
+implicit rule to use based on which kind of source file exists or can be made.
+For example, suppose the makefile looks like this:
+
+    foo : foo.o bar.o
+        cc -o foo foo.o bar.o $(CFLAGS) $(LDFLAGS)
+
+Because you mention foo.o but do not give a rule for it, make will automatically
+look for an implicit rule that tells how to update it. This happens whether or
+not the file foo.o currently exists.
+
+
+---
+
+
+10.2 Catalogue of Built-In Rules
+
+Compiling C programs:
+    $(CC) $(CPPFLAGS) $(CFLAGS) -c
+
+Compiling C++ programs:
+    $(CXX) $(CPPFLAGS) $(CXXFLAGS) -c
+
+Linking a single object file:
+    $(CC) $(LDFLAGS) n.o $(LOADLIBES) $(LDLIBS)
+
+(if there are multiple object files, one of which has a name matching that of
+the executable file)
+
+
+---
+
+
+10.5.2 Pattern Rule Examples
+
+Here are some examples of pattern rules actually predefined in make.
+First, the rule that compiles ‘.c’ files into ‘.o’ files:
+
+    %.o : %.c
+        $(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@
+
+defines a rule that can make any file x.o from x.c. The recipe uses the
+automatic variables ‘$@’ and ‘$<’ to substitute the names of the target
+file and the source file in each case where the rule applies
 
 
 ---
