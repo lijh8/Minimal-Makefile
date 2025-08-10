@@ -1,56 +1,53 @@
 GNU make
 
-        https
-    : // www.gnu.org/software/make/manual/make.pdf
+https://www.gnu.org/software/make/manual/make.pdf
 
-      -- -
 
-      makefile is line
-          oriented.targets
-    : prerequisites are separated by colon on same
-          line.recipes are command lines.makefile variable values are text.
+---
 
-      -- -
 
-      pattern rules often use the percentage
-          sign ` % ` to apply to files of some types with a pattern like `%
-        .o : %
-        .c`
-        .
+makefile is line oriented.
+targets : prerequisites are separated by colon on same line.
+recipes are command lines.
+makefile variable values are text.
 
-             implicit rules are builtin rules provided by the make tool
-                 itself.implicit rules are often pattern rules too,
-    so it applies to all files of the
-            type.
 
-        explicit rules are written in the makefile explictily.it can be a
-            pattern rule if it contains `%`,
-    or a non -
-                pattern rule.
+---
 
-                -- -
 
-                check builtin variables in make
+pattern rules often use the percentage sign ` % ` to apply to files of
+some types with a pattern like `%.o : %.c`.
 
-                    $ make -
-                p |
-            grep - E '^[A-Za-z0-9_-]+ :?=' |
-            vi -
+implicit rules are builtin rules provided by the make tool itself.
+implicit rules are often pattern rules too,
+so it applies to all files of the type.
 
-                -- -
+explicit rules are written in the makefile explictily.
+it can be a pattern rule if it contains `%`, or a non-pattern rule.
 
-                   libfoo.so->#symbolic link;
-libfoo.so .1->#symbolic link, soname;
-libfoo .1.2.3 #actual library file;
 
-1. build shared object :
+---
 
-    encode the soname in the actual library file libfoo.so .1.2.3
-    : LDFLAGS += -Wl,
-    -soname,
-    libfoo.so .1
 
-    create symbolic links;
+check builtin variables in make
+
+$ make -p | grep -E '^[A-Za-z0-9_-]+ :?=' | vi -
+
+
+---
+
+
+libfoo.so     ->  # symbolic link;
+libfoo.so.1   ->  # symbolic link, soname;
+libfoo.1.2.3      # actual library file;
+
+
+1. build shared object:
+
+encode the soname in the actual library file libfoo.so.1.2.3:
+  LDFLAGS += -Wl,-soname,libfoo.so.1
+
+create symbolic links ;
 
 $ objdump -p foo/libfoo.so  | grep -i soname
    SONAME               libfoo.so.1
@@ -62,108 +59,129 @@ $
 $ g++ -L../foo -lfoo -o a.out
 
 linker looks for libfoo.so for option ` -lfoo `;
-libfoo.so links to libfoo.so .1;
-libfoo.so .1 links to libfoo.so .1.2.3;
-the soname libfoo.so .1 in actual library file is recorded in executable a.out;
+libfoo.so links to libfoo.so.1;
+libfoo.so.1 links to libfoo.so.1.2.3;
+the soname libfoo.so.1 in actual library file is recorded in executable a.out;
 
-$ LD_LIBRARY_PATH = foo ldd./ main /
-                    main libfoo.so .1 = >
-                                        foo / libfoo.so .1(0x00007f3777524000)$
+$ LD_LIBRARY_PATH=foo ldd ./main/main
+        libfoo.so.1 => foo/libfoo.so.1 (0x00007f3777524000)
+$
 
-                                              3. runtime :
 
-    $ LD_LIBRARY_PATH =../ foo./
-                       a.out
+3. runtime:
 
-                       the soname libfoo.so .1 in executable a.out is examined,
-  libfoo.so .1 links to libfoo.so .1.2.3;
+$ LD_LIBRARY_PATH=../foo ./a.out
 
--- -
+the soname libfoo.so.1 in executable a.out is examined,
+libfoo.so.1 links to libfoo.so.1.2.3;
 
-   https
-    : // www.gnu.org/software/make/
 
-      A rule in the makefile tells Make how to execute a series of commands in
-          order to build a target file from source
-              files.It also specifies a list of dependencies of the target
-                  file.This list should include all
-                  files(whether source files or other targets)
-                      which are used as inputs to the commands in the rule.
+---
 
-      target : dependencies... commands...
 
-               If a target file is newer than all of its dependencies,
-    then it is already up to date,
-    and it does not need to be regenerated.The other target files
-        do need to be updated,
-    but in the right order
-    : each target file must be regenerated before it is used in
-      regenerating other targets.
+https://www.gnu.org/software/make/
 
-      https : // www.gnu.org/software/make/manual/make.html
+A rule in the makefile tells Make how to execute a series of commands in order
+to build a target file from source files. It also specifies a list of
+dependencies of the target file. This list should include all files (whether
+source files or other targets) which are used as inputs to the commands in the
+rule.
 
-              The make program uses the makefile data base and the last
-        - modification times of the files to decide which of the files need to
-          be updated.For each of those files,
-    it issues the recipes recorded in the data base
-            .
+  target: dependencies ...
+    commands
+    ...
 
-        -- -
+If a target file is newer than all of its dependencies, then it is already up to
+date, and it does not need to be regenerated. The other target files do need to
+be updated, but in the right order: each target file must be regenerated before
+it is used in regenerating other targets.
 
-        Example 1 :
 
-    an empty makefile
+https://www.gnu.org/software/make/manual/make.html
 
-    $ cat Makefile $ $ make x #goal name is basename of the source file cc x.c
-        - o x $
+The make program uses the makefile data base and the last-modification times of
+the files to decide which of the files need to be updated. For each of those
+files, it issues the recipes recorded in the data base.
 
-        Example 2 :
 
-    a rule without prerequisites and recipes,
-    which just mentions the target
+---
 
-        $ cat Makefile x
-    : #target name is basename of the source file $ $ make cc x.c
-        -
-        o x $
 
-        Example 3 :
+Example 1:
 
-    $ cat Makefile x : x.o $ $ make cc
-        - c - o x.o x.c cc x.o -
-        o x $
+an empty makefile
 
-        Example 4 :
+$ cat Makefile
+$
+$ make x  # goal name is basename of the source file
+cc x.c -o x
+$
 
-    $ cat Makefile x : y.o z.o #no mentioning x.o $ $ make cc
-        - c - o y.o y.c cc - c - o z.o z.c cc x.c y.o z.o -
-        o x $
+Example 2:
 
-        Example 5 :
+a rule without prerequisites and recipes, which just mentions the target
 
-    $ cat Makefile x : y.o z.o x.o $ $ make cc
-        - c - o x.o x.c cc - c - o y.o y.c cc - c - o z.o z.c cc x.o y.o z.o -
-        o x $
+$ cat Makefile
+x:  # target name is basename of the source file
+$
+$ make
+cc x.c -o x
+$
 
-            recursive expansion happens when the variable is substituted
-            / used.
+Example 3:
 
-              x = foo y = $(x) bar x = later
+$ cat Makefile
+x: x.o
+$
+$ make
+cc -c -o x.o x.c
+cc x.o -o x
+$
 
-    all:;
-@echo $(x),
-    $(y) #expansion of y happens when it is used here
+Example 4:
 
-        $ make
-        - f a.mk later,
-    later bar $
+$ cat Makefile
+x: y.o z.o  # no mentioning x.o
+$
+$ make
+cc -c -o y.o y.c
+cc -c -o z.o z.c
+cc x.c y.o z.o -o x
+$
 
-    simple expansion happens when the variable is defined.
+Example 5:
 
-    x : = foo y : = $(x) bar #expansion of y happens when it is defined here x
-    : = later
+$ cat Makefile
+x: y.o z.o x.o
+$
+$ make
+cc -c -o x.o x.c
+cc -c -o y.o y.c
+cc -c -o z.o z.c
+cc x.o y.o z.o -o x
+$
 
-      all:; @echo $(x), $(y)
+
+recursive expansion happens when the variable is substituted / used.
+
+x = foo
+y = $(x) bar
+x = later
+
+all: ; @echo $(x), $(y)   # expansion of y happens when it is used here
+
+$ make -f a.mk
+later, later bar
+$
+
+
+simple expansion happens when the variable is defined.
+
+x := foo
+y := $(x) bar            # expansion of y happens when it is defined here
+x := later
+
+all: ; @echo $(x), $(y)
 
 $ make -f a.mk
 later, foo bar
@@ -286,10 +304,9 @@ target names.
 use the ‘-MM’ flag
 
 %.d: %.c
-    @set -e;
-rm - f $ @;
-$(CC) - M $(CPPFLAGS) $<> $ @.$$$$;
-sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $ @.$$$$ > $ @;
+    @set -e; rm -f $@; \
+        $(CC) -M $(CPPFLAGS) $< > $@.$$$$; \
+        sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
         rm -f $@.$$$$
 
 
@@ -557,25 +574,19 @@ $
 
 An argument that contains ‘=’ specifies the value of a variable: ‘v=x’ sets the
 value of the variable v to x. If you specify a value in this way, all ordinary
-assignments of the same variable in the makefile are ignored;
-we say they have been overridden by the command line argument.
+assignments of the same variable in the makefile are ignored; we say they have
+been overridden by the command line argument.
 
-    For example,
-    if you say ‘make CFLAGS = '-g -O'’,
-                     each C compilation will be done with ‘cc - c - g -
-                         O’.
+For example, if you say ‘make CFLAGS='-g -O'’, each C compilation will be done
+with ‘cc -c -g -O’.
 
-                         You can also program the makefile to look at additional
-                             variables of your own,
-                     giving the user the ability to control other aspects of how
-                         the makefile works by changing the variables.
+You can also program the makefile to look at additional variables of your own,
+giving the user the ability to control other aspects of how the makefile works
+by changing the variables.
 
-                     When you override a variable with a command line argument,
-                     you can define either a recursively - expanded variable or
-                         a simply -
-                             expanded variable.The examples shown above make a
-                                 recursively -
-                             expanded variable; to make a simply-expanded
+When you override a variable with a command line argument, you can define either
+a recursively-expanded variable or a simply-expanded variable. The examples
+shown above make a recursively-expanded variable; to make a simply-expanded
 variable, write ‘:=’ or ‘::=’ instead of ‘=’. But, unless you want to include a
 variable reference or function call in the value that you specify, it makes no
 difference which kind of variable you create.
