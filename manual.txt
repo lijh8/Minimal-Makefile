@@ -276,6 +276,22 @@ no need to write explicit rules for compiling the files)
 
 4.11 Multiple Rules for One Target
 
+One file can be the target of several rules. All the prerequisites mentioned in
+all the rules are merged into one list of prerequisites for the target.
+
+There can only be one recipe to be executed for a file.
+
+An extra rule with just prerequisites can be used to give a few extra
+prerequisites to many files at once.
+
+This could be inserted or taken out without changing the rules that really
+specify how to make the object files, making it a convenient form to use if you
+wish to add the additional prerequisite intermittently.
+
+If none of the explicit rules for a target has a recipe, then make searches for
+an applicable implicit rule to find one.
+
+
 Another wrinkle is that the additional prerequisites could be specified with a
 variable that you set with a command line argument to make (see Overriding
 Variables). For example,
@@ -380,27 +396,6 @@ but the result of both of these will give you the same working program.
 >     x: $(patsubst %.c,%.o,$(wildcard *.c))
 
 This is fine too.
-
-
----
-
-
-4.11 Multiple Rules for One Target
-
-One file can be the target of several rules. All the prerequisites mentioned in
-all the rules are merged into one list of prerequisites for the target.
-
-There can only be one recipe to be executed for a file.
-
-An extra rule with just prerequisites can be used to give a few extra
-prerequisites to many files at once.
-
-This could be inserted or taken out without changing the rules that really
-specify how to make the object files, making it a convenient form to use if you
-wish to add the additional prerequisite intermittently.
-
-If none of the explicit rules for a target has a recipe, then make searches for
-an applicable implicit rule to find one.
 
 
 ---
