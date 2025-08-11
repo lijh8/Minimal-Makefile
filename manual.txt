@@ -1,7 +1,5 @@
 GNU make
 
-https://www.gnu.org/software/make/manual/make.pdf
-
 
 ---
 
@@ -367,10 +365,7 @@ prerequisites.  Instead, look at this method:
 3.
 
 https://lists.gnu.org/archive/html/help-make/2025-05/msg00001.html ,
-
-Q: when do `make clean` twice, why it triggers the rule for `.d` files?
-
-A:
+when do `make clean` twice, why it triggers the rule for `.d` files?
 
 Paul Smith:
 Make always tries to rebuild all its included files.  See:
@@ -449,6 +444,7 @@ foo: bar
 foo2: bar2
 MAKEFLAGS:  -- foo2=bar2 foo=bar
 $
+
 
 ---
 
@@ -639,65 +635,36 @@ Linking a single object file:
     $(CC) $(LDFLAGS) n.o $(LOADLIBES) $(LDLIBS)
 
 This rule does the right thing for a simple program with only one source file.
-It will also do the right thing if there are multiple object files,
+n is made automatically from n.o by running the C compiler to link the program.
+
+It will also do the right thing if there are multiple source files,
 one of which has a name matching that of the executable file.
 
-Note:
-
-The builtin linking rule:
-
-# output of make -p
-%: %.o
-  $(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
-
-works for linking one object file
-(utility the builtin rule and omit the recipe)
+# 1. one source file n.c.
 n: n.o
 
-and for linking more than one object file
-(utility the builtin rule and omit the recipe)
+# 2. multiple source files x.c, y.c, z.c.
+x: y.o z.o      # no mention x.o, it works too.
+x: x.o y.o z.o  # mention x.o.
+
+For example, there are source files x.c, y.c, z.c,
+if we name the target name same as the stem basename of one of the source files,
+and we want to utility the builtin linking rule and omit the recipe command.
+
 x: x.o y.o z.o
-or, even without mention x.o in prerequisite,
-x: y.o z.o
 
-for exmaple there is just one source file x.c,
-x: x.o
-will match the builtin rule ` %: %.o `.
-
-for exmaple there are three source file x.c, y.c, z.c,
-because i want to utility the builtin rule and omit the recipe.
-x: x.o y.o z.o
-will search for the builtin rule ` %: %.o `,
-it will be this ` x: x.o ` with additional prerequisites ` x: x.o y.o z.o `.
-this works even if i do not mention x.o in the prerequisite,
-x: y.o z.o
-
-becuase ` x: x.o ` matches builtin ` %: %.o ` and will always be there.
-
-The only requirement is that:
-the target name is same as the stem basename of one of the source files.
-the target is x, and there is a source file x.c there.
-
-
-Multiple rules for one target will be merging of prerequisites of multiple
-individual rules with the same target
-(according to manual 4.11 Multiple Rules for One Target)
+can be merged from multiple individual rule,
 
 x: x.o
 x: y.o
 x: z.o
 
-the first rule ` x: x.o ` matches the builtin linking rule ` %: %.o `.
-the rest two rules ` x: y.o ` and ` x: z.o ` are for the one same target and
-their prerequisies will be merged with the first rule ` x: x.o y.o z.o `.
+The first rule `x: x.o` with target name same the stem basename of the
+source file will match the builtin linking rule first,
 
-https://lists.gnu.org/archive/html/bug-make/2022-08/msg00044.html ,
-Re: Implicit rule for linking multiple object files
-Paul Smith
-
-https://lists.gnu.org/archive/html/bug-make/2022-08/msg00025.html ,
-Re: The order of compiling multiple c++ source files
-Paul Smith
+and the prequisites of the rest other rules will be merged into the
+prerequisites of the first rule because their target name are the same,
+according to manual 4.11 Multiple Rules for One Target.
 
 
 ---
