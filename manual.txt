@@ -640,6 +640,8 @@ n is made automatically from n.o by running the C compiler to link the program.
 It will also do the right thing if there are multiple source files,
 one of which has a name matching that of the executable file.
 
+Note:
+
 # 1. one source file n.c.
 n: n.o
 
@@ -648,7 +650,8 @@ x: y.o z.o      # no mention x.o, it works too.
 x: x.o y.o z.o  # mention x.o.
 
 For example, there are source files x.c, y.c, z.c,
-if we name the target name same as the stem basename of one of the source files,
+if we name the target same as the stem basename of one of the source files,
+we name the target `x` because there is a source file named `x.c`,
 and we want to utility the builtin linking rule and omit the recipe command.
 
 x: x.o y.o z.o
@@ -660,10 +663,10 @@ x: y.o
 x: z.o
 
 The first rule `x: x.o` with target name same the stem basename of the
-source file will match the builtin linking rule first,
+source file will match the builtin linking rule first.
 
-and the prequisites of the rest other rules will be merged into the
-prerequisites of the first rule because their target name are the same,
+The prequisites of the rest other rules will be merged into the prerequisites of
+the first rule because their target name are the same,
 according to manual 4.11 Multiple Rules for One Target.
 
 
