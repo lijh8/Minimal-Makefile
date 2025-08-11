@@ -138,6 +138,11 @@ cc -c -o x.o x.c
 cc x.o -o x
 $
 
+
+https://lists.gnu.org/archive/html/bug-make/2022-08/msg00044.html ,
+Re: Implicit rule for linking multiple object files ,
+Paul Smith ,
+
 Example 4:
 
 $ cat Makefile
@@ -657,6 +662,18 @@ target (according to manual 4.11 Multiple Rules for One Target)
 x: x.o
 x: y.o
 x: z.o
+
+the first rule ` x: x.o ` matches the builtin linking rule ` %: %.o `.
+the rest two rules ` x: y.o ` and ` x: z.o ` are for the one same target and
+their prerequisies will be merged with the first rule ` x: x.o y.o z.o `.
+
+https://lists.gnu.org/archive/html/bug-make/2022-08/msg00044.html ,
+Re: Implicit rule for linking multiple object files
+Paul Smith
+
+https://lists.gnu.org/archive/html/bug-make/2022-08/msg00025.html ,
+Re: The order of compiling multiple c++ source files
+Paul Smith
 
 
 ---
