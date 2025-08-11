@@ -651,13 +651,37 @@ The builtin linking rule:
   $(LINK.o) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 works for linking one object file
+(utility the builtin rule and omit the recipe)
 n: n.o
 
 and for linking more than one object file
+(utility the builtin rule and omit the recipe)
 x: x.o y.o z.o
+or, even without mention x.o in prerequisite,
+x: y.o z.o
 
-which can be merging of prerequisites of multiple individual rules with the same
-target (according to manual 4.11 Multiple Rules for One Target)
+for exmaple there is just one source file x.c,
+x: x.o
+will match the builtin rule ` %: %.o `.
+
+for exmaple there are three source file x.c, y.c, z.c,
+because i want to utility the builtin rule and omit the recipe.
+x: x.o y.o z.o
+will search for the builtin rule ` %: %.o `,
+it will be this ` x: x.o ` with additional prerequisites ` x: x.o y.o z.o `.
+this works even if i do not mention x.o in the prerequisite,
+x: y.o z.o
+
+becuase ` x: x.o ` matches builtin ` %: %.o ` and will always be there.
+
+The only requirement is that:
+the target name is same as the stem basename of one of the source files.
+the target is x, and there is a source file x.c there.
+
+
+Multiple rules for one target will be merging of prerequisites of multiple
+individual rules with the same target
+(according to manual 4.11 Multiple Rules for One Target)
 
 x: x.o
 x: y.o
