@@ -634,13 +634,18 @@ Compiling C++ programs:
 Linking a single object file:
     $(CC) $(LDFLAGS) n.o $(LOADLIBES) $(LDLIBS)
 
-This rule does the right thing for a simple program with only one source file.
 n is made automatically from n.o by running the C compiler to link the program.
 
+This rule does the right thing for a simple program with only one source file.
 It will also do the right thing if there are multiple source files,
 one of which has a name matching that of the executable file.
 
-Note:
+
+Explanation 1:
+
+# builtin implicit rule from make data base with make -p
+%: %.o
+	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS)
 
 # 1. one source file n.c.
 n: n.o
@@ -649,25 +654,33 @@ n: n.o
 x: y.o z.o      # no mention x.o, it works too.
 x: x.o y.o z.o  # mention x.o.
 
-For example, there are source files x.c, y.c, z.c,
-if we name the target same as the stem basename of one of the source files,
-we name the target `x` because there is a source file named `x.c`,
+Source files x.c, y.c, z.c exist.
+Target `x` is same as the stem basename of one of the object file `x.o`.
+This builtin linking rule `%: %.o` matches this
+  x: x.o
+It also merges all prerequisites
+  x: x.o y.o z.o
+
+We name the target same as the stem basename of one of the source files,
 and we want to utility the builtin linking rule and omit the recipe command.
 
-x: x.o y.o z.o
 
-can be merged from multiple individual rule,
+Explanation 2:
 
-x: x.o
-x: y.o
-x: z.o
+This rule
+  x: x.o y.o z.o
 
-The first rule `x: x.o` with target name same the stem basename of the
-source file will match the builtin linking rule first.
+can be merged from multiple individual rules
+  x: x.o
+  x: y.o
+  x: z.o
 
-The prequisites of the rest other rules will be merged into the prerequisites of
+The first rule `x: x.o` matches `%: %.o`,
+its target name is same as the stem basename of the source.
+
+The prequisites of the rest two rules will be merged into the prerequisites of
 the first rule because their target name are the same,
-according to manual 4.11 Multiple Rules for One Target.
+according to gnu make manual chapter 4. Multiple Rules for One Target.
 
 
 ---
