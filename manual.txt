@@ -617,6 +617,9 @@ Because you mention foo.o but do not give a rule for it, make will automatically
 look for an implicit rule that tells how to update it. This happens whether or
 not the file foo.o currently exists.
 
+A file “can be made” if it is mentioned explicitly in the makefile as a target
+or a prerequisite,
+
 
 ---
 
@@ -644,28 +647,22 @@ one of which has a name matching that of the executable file.
 %: %.o
 	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS)
 
-For one object file n.o
+# for one object file n.o
   n: n.o
 
-For multiple object files x.o, y.o, z.o
+# for multiple object files x.o, y.o, z.o
   x: x.o y.o z.o
 
 Note:
 
-Source files x.c, y.c, z.c exist.
-Object files x.o, y.o, z.o are compiled using a built-in implicit rule.
-Target `x` is named after stem (basename) of one of object files `x.o`.
-Pattern `x: x.o` matches built-in linking rule `%: %.o`.
+If file `n.o` is mentioned even in prerequisite,
+it compiles using implicit rule without requiring us to write `n.o: n.c`.
+
+Similarly, If file `x` is mentioned,
+it links using implicit rule without requiring us to write `x: x.o`.
+
 Additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`.
-(As per GNU Make manual, Chapter 4: Multiple Rules for One Target)
-
-Or, think of it this way, the rule
-  x: x.o y.o z.o
-
-is formed by merging these individual rules
-  x: x.o
-  x: y.o
-  x: z.o
+Duplicates `x: x.o x.o` will be deduplicated to `x: x.o y.o z.o`.
 
 
 ---
