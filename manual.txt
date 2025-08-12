@@ -655,14 +655,47 @@ one of which has a name matching that of the executable file.
 
 Note:
 
-If file `n.o` is mentioned even in prerequisite,
-it compiles using implicit rule without requiring us to write `n.o: n.c`.
+If object file `n.o` is mentioned in prerequisite,
+it is compiled using implicit rule without requiring us to write `n.o: n.c`.
 
-Similarly, If file `x` is mentioned,
-it links using implicit rule without requiring us to write `x: x.o`.
+If executable file `x` is named after stem of one of object or source files,
+it is linked using implicit rule without requiring us to write `x: x.o`.
 
-Additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`.
-Duplicates `x: x.o x.o` will be deduplicated to `x: x.o y.o z.o`.
+Additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`,
+and duplicated prerequisites `x: x.o x.o` are only kept once `x: x.o y.o z.o`.
+
+
+Example 1:
+
+$ ls
+Makefile  x.c
+$
+
+$ cat Makefile
+# empty
+$
+$ make x  # goal name is stem of one of source files
+cc x.c -o x
+$
+
+Example 2:
+
+$ cat Makefile
+x:  # target name is stem of one of source files
+$
+$ make
+cc x.c -o x
+$
+
+Example 3:
+
+$ cat Makefile
+x: x.o  # target name is stem of one of source or object files
+$
+$ make
+cc -c -o x.o x.c
+cc x.o -o x
+$
 
 
 ---
