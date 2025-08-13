@@ -662,7 +662,7 @@ If executable file `x` is named after stem of one of object or source files,
 it is linked using implicit rule without requiring us to write `x: x.o`.
 
 Additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`,
-and duplicated prerequisites `x: x.o x.o` are only kept once `x: x.o y.o z.o`.
+and duplicated prerequisites `x: x.o x.o` are deduplicated `x: x.o y.o z.o`.
 
 
 Example 1:
