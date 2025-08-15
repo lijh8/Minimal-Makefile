@@ -105,38 +105,6 @@ files, it issues the recipes recorded in the data base.
 ---
 
 
-Example 1:
-
-an empty makefile
-
-$ cat Makefile
-$
-$ make x  # goal name is basename of the source file
-cc x.c -o x
-$
-
-Example 2:
-
-a rule without prerequisites and recipes, which just mentions the target
-
-$ cat Makefile
-x:  # target name is basename of the source file
-$
-$ make
-cc x.c -o x
-$
-
-Example 3:
-
-$ cat Makefile
-x: x.o
-$
-$ make
-cc -c -o x.o x.c
-cc x.o -o x
-$
-
-
 https://lists.gnu.org/archive/html/bug-make/2022-08/msg00044.html ,
 Re: Implicit rule for linking multiple object files ,
 Paul Smith ,
@@ -418,7 +386,24 @@ foo : bar
 5.7 Recursive Use of make
 
 Recursive use of make means using make as a command in a makefile.
+This technique is useful when you want separate makefiles for various subsystems
+that compose a larger system.
+For example, suppose you have a sub-directory subdir which has its own makefile,
+and you would like the containing directory’s makefile to run make on the
+sub-directory. You can do it by writing this:
 
+subsystem:
+        cd subdir && $(MAKE)
+
+or, equivalently, this:
+
+subsystem:
+        $(MAKE) -C subdir
+
+You may also find it useful to declare targets that invoke recursive make
+commands as ‘.PHONY’.
+
+.PHONY: subsystem
 
 ---
 
@@ -435,11 +420,11 @@ Sub-make.
 
 $ cat Makefile
 all:
-	@echo "foo: $(foo)"
-	@echo "foo2: $(foo2)"
-	@echo "MAKEFLAGS: $(MAKEFLAGS)"
+  @echo "foo: $(foo)"
+  @echo "foo2: $(foo2)"
+  @echo "MAKEFLAGS: $(MAKEFLAGS)"
 $
-$	make foo=bar foo2=bar2
+$ make foo=bar foo2=bar2
 foo: bar
 foo2: bar2
 MAKEFLAGS:  -- foo2=bar2 foo=bar
@@ -491,11 +476,11 @@ export directive to pass other variables.
 
 $ cat Makefile
 all:
-	@echo "foo: $(foo)"
-	@echo "foo2: $(foo2)"
-	@echo "MAKEFLAGS: $(MAKEFLAGS)"
+  @echo "foo: $(foo)"
+  @echo "foo2: $(foo2)"
+  @echo "MAKEFLAGS: $(MAKEFLAGS)"
 $
-$	make foo=bar foo2=bar2
+$ make foo=bar foo2=bar2
 foo: bar
 foo2: bar2
 MAKEFLAGS:  -- foo2=bar2 foo=bar
@@ -551,7 +536,7 @@ bar := 123
 endif
 
 test:
-	@echo "$(flavor foo) |$(bar)|"
+  @echo "$(flavor foo) |$(bar)|"
 
 $
 
@@ -643,7 +628,7 @@ one of which has a name matching that of the executable file.
 
 # make -p
 %: %.o
-	$(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS)
+  $(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS)
 
 # for one object file n.o
   n: n.o
@@ -675,20 +660,20 @@ $
 $ cat Makefile
 # empty
 $ make x  # goal name is stem of one of source files
-cc x.c -o x
+cc     x.c   -o x
 $
 
 $ cat Makefile
 x:  # target name is stem of one of source files
 $ make
-cc x.c -o x
+cc     x.c   -o x
 $
 
 $ cat Makefile
 x: x.o  # target name is stem of one of source or object files
 $ make
-cc -c -o x.o x.c
-cc x.o -o x
+cc    -c -o x.o x.c
+cc   x.o   -o x
 $
 
 Example 2:
