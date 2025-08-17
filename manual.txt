@@ -638,18 +638,17 @@ one of which has a name matching that of the executable file.
 
 Note:
 
-If object file `n.o` is mentioned in prerequisite,
-it is compiled using implicit rule without requiring us to write `n.o: n.c`.
+1. If an object file is mentioned in prerequisite `x: x.o`,
+  it uses implicit rule `%.o: %.c` to compiles source file to object file,
+  object and source filenames share same stem or basename.
 
-If executable file `x` is named after stem of one of object or source files,
-it is linked using implicit rule without requiring us to write `x: x.o`.
+2. If executable file is named after stem of one of source or object files
+  `x: x.o`, it uses implicit rule to link object file to executable,
+  executable and object filenames share same stem too.
 
-Additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`,
-and duplicated prerequisites `x: x.o x.o` are deduplicated `x: x.o y.o z.o`.
-
-If `x.o` is not in prerequisite `x: y.o z.o`, it picks up `%: %.c` to link `x.c`.
-If `x.o` is in prerequisite `x: x.o y.o z.o`, all use `%.o: %.c` then `%: %.o`.
-The output executable is the same whether `x.o` is in prerequisite or not.
+3. If there are multiple source files hence object files,
+  additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`,
+  duplicated prerequisites `x: x.o x.o` are deduplicated `x: x.o y.o z.o`.
 
 Example 1:
 
