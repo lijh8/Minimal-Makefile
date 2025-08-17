@@ -639,27 +639,27 @@ one of which has a name matching that of the executable file.
 Note:
 
 1. If executable file is named after stem (basename) of one of object files
-  `x: x.o`, it uses implicit rule `%: %.o` to link object file to executable,
+  `x: x.o`, it uses implicit rule `%: %.o` to link object file to executable;
   executable and object filenames share same stem.
 
 2. If an object file is mentioned in prerequisite `x: x.o`,
   it uses implicit rule `%.o: %.c` to compile source file to object file,
-  object and source filenames share same stem too,
+  object and source filenames share same stem too;
   this is chaining of implicit rules: source to object to executable.
 
 3. If there are multiple source files hence object files,
   additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`,
   duplicated prerequisites `x: x.o x.o` are deduplicated `x: x.o y.o z.o`.
 
-4. how automatically can makefile be?
-  choose a proper name for one of the source files, eg `x.c`;
-  name the executable after one of the source or object files, eg `x`;
+4. How automatically can makefile be?
+  name one of the source files properly, eg `x.c`;
+  name executable after one of the source or object files, eg `x`;
 
     `x: $(patsubst %.c,%.o,$(wildcard *.c))`
 
-  generate prerequisites for header file dependencies: CPPFLAGS += -MMD -MP;
+  generate prerequisites for header file dependencies: `CPPFLAGS += -MMD -MP`;
   use wildcard function, do not use `*.o` directly in target and prerequisite;
-  do not use `$(wildcard *.o)`, it matches nothing when there is no object files;
+  do not use `$(wildcard *.o)`, as it matches nothing when there is no object file;
 
 Example 1:
 
