@@ -651,7 +651,7 @@ Note:
   additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`,
   duplicated prerequisites `x: x.o x.o` are deduplicated `x: x.o y.o z.o`.
 
-4. How automatically can makefile be?
+How automatic can makefile be?
   name one of the source files properly, eg `x.c`;
   name executable after one of the source or object files, eg `x`;
 
@@ -659,7 +659,7 @@ Note:
 
   generate prerequisites for header file dependencies: `CPPFLAGS += -MMD -MP`;
   use wildcard function, do not use `*.o` directly in target and prerequisite;
-  do not use `$(wildcard *.o)`, as it matches nothing when there is no object file;
+  do not use `$(wildcard *.o)`, it matches nothing when there is no object file;
 
 Example 1:
 
