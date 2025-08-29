@@ -229,6 +229,26 @@ target,
 ---
 
 
+3.8 How Makefiles Are Parsed
+
+Scan the line for a separator character, such as ‘:’ or ‘=’, to determine
+whether the line is a macro assignment or a rule.
+
+
+---
+
+
+4.2
+
+The targets are file names, separated by spaces.
+
+The criterion for being out of date is specified in terms of the prerequisites,
+which consist of file names separated by spaces.
+
+
+---
+
+
 4.3.3 The Function wildcard
 
 a makefile to compile all C source files in the directory and then link them
