@@ -97,18 +97,18 @@ libfoo.a: libfoo.a($(patsubst %.c,%.o,$(wildcard *.c))) # .cpp
 #   "asan+lsan+ubsan is fine, the rest should run separately."  --kcc, Jan 12, 2019
 
 # address (including leak), undefined behavior sanitizers,
-CFLAGS   += -fsanitize=address -fsanitize=undefined -fsanitize=leak # CXXFLAGS for .cpp
-LDFLAGS  += -fsanitize=address -fsanitize=undefined -fsanitize=leak # CXXFLAGS for .cpp
+CFLAGS   += -fsanitize=address,leak,undefined  # CXXFLAGS for .cpp
+LDFLAGS  += -fsanitize=address,leak,undefined  # CXXFLAGS for .cpp
 
 # thread sanitizer,
-#CFLAGS  += -fsanitize=thread # CXXFLAGS for .cpp
+#CFLAGS  += -fsanitize=thread  # CXXFLAGS for .cpp
 #LDFLAGS += -fsanitize=thread
 
 # https://github.com/google/sanitizers/issues/1039#issuecomment-453306241 ,
 #   "GCC doesn't have msan at all."  --kcc, Jan 11, 2019
 
 # memory sanitizer, (gcc has no msan. use clang, clang++, if needed)
-#CFLAGS  += -fsanitize=memory -fPIE # CXXFLAGS for .cpp
+#CFLAGS  += -fsanitize=memory -fPIE  # CXXFLAGS for .cpp
 #LDFLAGS += -fsanitize=memory -pie
 
 #
