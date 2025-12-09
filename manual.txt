@@ -671,6 +671,10 @@ Note:
   additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`,
   duplicated prerequisites `x: x.o x.o` are deduplicated `x: x.o y.o z.o`.
 
+
+---
+
+
 How automatic can makefile be?
   name one of the source files properly, eg `x.c`;
   name executable after one of the source or object files, eg `x`;
@@ -680,6 +684,80 @@ How automatic can makefile be?
   generate prerequisites for header file dependencies: `CPPFLAGS += -MMD -MP`;
   use wildcard function, do not use `*.o` directly in target and prerequisite;
   do not use `$(wildcard *.o)`, it matches nothing when there is no object file;
+
+
+Steps:
+
+1. A linking rule without recipe;
+2. Target name match the stem basename of one of the source files:
+  main: $(patsubst %.c,%.o,$(wildcard *.c))
+
+  This expands to:
+  main: main.o foo.o
+
+Explanation:
+
+. The linking rule have no recipe, so the builtin linking rule applies:
+  %: %.o
+    $(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS)
+
+. Target name matches the object filename ` main: main.o `,
+  so the pattern ` %: %.o ` applies;
+
+. The rest object files which do not match the target are
+  considered as additional prerequisites to the built linking rule:
+    main: foo.o bar.o
+
+. C and C++ source files are compiled into object files with builtin rule first;
+
+
+$ ls
+Makefile  foo.c  foo.h  main.c
+$
+
+$ cat ./Makefile
+CPPFLAGS = -MMD -MP # -I../foo
+main: $(patsubst %.c,%.o,$(wildcard *.c))
+-include *.d
+clean: ; $(RM) *.o *.d main
+.PHONY: clean
+$
+
+$ cat ./foo.c
+#include "foo.h"
+#include <stdio.h>
+void foo() {
+    printf("foo\n");
+}
+$
+
+$ cat ./foo.h
+#ifndef foo_h
+#define foo_h
+void foo();
+#endif
+$
+
+$ cat main.c
+#include <stdio.h>
+#include "foo.h"
+int main() {
+    printf("main\n");
+    foo();
+}
+$
+
+$ make && ./main
+cc  -MMD -MP   -c -o main.o main.c
+cc  -MMD -MP   -c -o foo.o foo.c
+cc   main.o foo.o   -o main
+main
+foo
+$
+
+
+---
+
 
 Example 1:
 
