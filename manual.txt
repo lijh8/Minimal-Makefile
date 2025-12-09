@@ -646,9 +646,23 @@ This rule does the right thing for a simple program with only one source file.
 It will also do the right thing if there are multiple object files,
 one of which has a name matching that of the executable file.
 
+
+---
+
+
 # make -p
+
+# builtin implicit rule for compiling
+%.o: %.c
+  $(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+%.o: %.cpp
+  $(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+
+# builtin implicit rule for linking
 %: %.o
-  $(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS)
+  $(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
 
 # for one object file n.o
   n: n.o
@@ -656,59 +670,33 @@ one of which has a name matching that of the executable file.
 # for multiple object files x.o, y.o, z.o
   x: x.o y.o z.o
 
-Note:
-
-1. If executable file is named after stem (basename) of one of object files
-  `x: x.o`, it uses implicit rule `%: %.o` to link object file to executable;
-  executable and object filenames share same stem.
-
-2. If an object file is mentioned in prerequisite `x: x.o`,
-  it uses implicit rule `%.o: %.c` to compile source file to object file,
-  object and source filenames share same stem too;
-  this is chaining of implicit rules: source to object to executable.
-
-3. If there are multiple source files hence object files,
-  additional prerequisites `x: y.o z.o` are merged into `x: x.o y.o z.o`,
-  duplicated prerequisites `x: x.o x.o` are deduplicated `x: x.o y.o z.o`.
-
 
 ---
 
 
 How automatic can makefile be?
-  name one of the source files properly, eg `x.c`;
-  name executable after one of the source or object files, eg `x`;
 
-    `x: $(patsubst %.c,%.o,$(wildcard *.c))`
-
-  generate prerequisites for header file dependencies: `CPPFLAGS += -MMD -MP`;
-  use wildcard function, do not use `*.o` directly in target and prerequisite;
-  do not use `$(wildcard *.o)`, it matches nothing when there is no object file;
-
-
-Steps:
+  foo: $(patsubst %.c,%.o,$(wildcard *.c))
 
 1. A linking rule without recipe;
-2. Target name match the stem basename of one of the source files:
-  main: $(patsubst %.c,%.o,$(wildcard *.c))
 
-  This expands to:
-  main: main.o foo.o
+2. Target name matches the basename (stem) of one of the source files;
 
-Explanation:
+3. When target name is foo, object file name is foo.o, resulting a rule like:
+    ` foo: foo.o `
 
-. The linking rule have no recipe, so the builtin linking rule applies:
-  %: %.o
-    $(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS)
+  This matches the builtin implicit rule:
+    %: %.o
+      $(CC) $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS)
 
-. Target name matches the object filename ` main: main.o `,
-  so the pattern ` %: %.o ` applies;
+4. the extra source files contribute additional prerequisites,
+  and do not affect the match of the rule.
+  the matching object filename may or may not appear in the prerequisite list.
 
-. The rest object files which do not match the target are
-  considered as additional prerequisites to the built linking rule:
-    main: foo.o bar.o
+    foo: foo.o bar.o baz.o  # OK: matching object listed again
+    foo:       bar.o baz.o  # OK: matching object provided by the builtin rule
 
-. C and C++ source files are compiled into object files with builtin rule first;
+5. C and C++ source files are also compilied with builtin rules, of course.
 
 
 $ ls
