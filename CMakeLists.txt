@@ -23,7 +23,6 @@ set(CMAKE_C_STANDARD 11) # .cpp
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
 
 # $ cmake -B build -S . -DENABLE_SANITIZERS=ON
-# $ cmake --build build -j 4 # -v --target clean
 option(ENABLE_SANITIZERS "Enable Sanitizers" OFF)
 if (ENABLE_SANITIZERS)
     add_compile_options(-g)
@@ -91,15 +90,15 @@ $
 
 $ apt install cmake
 
-$ cmake -B build -S . -DENABLE_SANITIZERS=ON
-$ cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug # Release
-$ cmake --build build -j 4 --target clean # -v # verbose
+$ cmake -B build -S . # -DENABLE_SANITIZERS=ON
+$ cmake -B build -S . # -DCMAKE_BUILD_TYPE=Debug # Release
+$ cmake --build build -j4 # --target clean # -v # verbose
 $ make -C build DESTDIR=~/myapp install # staged install
 
 ## or,
 $ mkdir build && cd build
 $ cmake .. # -DCMAKE_BUILD_TYPE=Debug # Release
-$ make # -s # silent
+$ make -j4 # -s # silent
 $ make DESTDIR=~/myapp install
 
 
@@ -189,16 +188,21 @@ target_link_libraries(main PUBLIC foo)               # 这行触发传播
 ---
 
 
-target_link_libraries(main PUBLIC foo)远多于GNU Makefile的 -l 和 -L ：
+CMake target-level link:
 
-CMake自动处理：
-1. 链接库文件（相当于 -lfoo）
-2. 添加库的包含路径（相当于 -I/path/to/foo）
-3. 添加库的链接路径（相当于 -L/path/to/foo）
-4. 传递所有PUBLIC/INTERFACE属性
-5. 处理依赖库的依赖
-6. 平台特定的链接标志
-7. 构建顺序依赖
+target_link_libraries(main PUBLIC foo)
+
+. 这是 modern CMake 的目标级别链接;
+
+. 使用被链接目标中的完整库文件路径 ../foo/libfoo.so.1.2.3 ,
+  而非使用 ` -L/path/to `, ` -lfoo ` ,
+  这适用静态库 ` .a `, 或动态共享库 ` .so ` ;
+
+. 传递被链接目标中 target_include_directories 命令,
+  其中的 PUBLIC, INTERFACE 公开的头文件包含路径,
+  自动获得头文件包含路径 include ` -I ` ;
+
+. 管理依赖，先构建被链接目标;
 
 
 ---
@@ -210,12 +214,13 @@ CMake自动处理：
 执行构建:
 当只修改了现有 C, C++ 文件中代码时;
 
-$ cmake -B build -S .
-$ cmake --build build -v -j4
+$ cmake -B build -S . # -DCMAKE_BUILD_TYPE=Debug # Release
+$ cmake --build build -j4 # --target clean # -v # verbose
 
+# or,
 $ mkdir build && cd build
-$ cmake ..
-$ make -j4
+$ cmake .. # -DCMAKE_BUILD_TYPE=Debug # Release
+$ make -j4 # -s # silent
 
 
 ---
