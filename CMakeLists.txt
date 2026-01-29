@@ -31,10 +31,10 @@ cmake_minimum_required(VERSION 3.31)
 project(myapp VERSION 1.0)
 set(CMAKE_C_COMPILER gcc) # .cpp
 set(CMAKE_C_STANDARD 11) # .cpp
-set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE) # boolean set(): TRUE/FALSE
 
 # $ cmake -B build -S . -DENABLE_SANITIZERS=ON
-option(ENABLE_SANITIZERS "Enable Sanitizers" OFF)
+option(ENABLE_SANITIZERS "Enable Sanitizers" OFF) # option(): ON/OFF
 if (ENABLE_SANITIZERS)
     add_compile_options(-g)
     add_compile_options(-fsanitize=address,undefined)
