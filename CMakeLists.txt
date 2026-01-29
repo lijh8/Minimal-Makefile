@@ -32,6 +32,7 @@ project(myapp VERSION 1.0)
 set(CMAKE_C_COMPILER gcc) # .cpp
 set(CMAKE_C_STANDARD 11) # .cpp
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE) # boolean set(): TRUE/FALSE
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 
 # $ cmake -B build -S . -DENABLE_SANITIZERS=ON
 option(ENABLE_SANITIZERS "Enable Sanitizers" OFF) # option(): ON/OFF
@@ -45,6 +46,8 @@ add_subdirectory(main)
 add_subdirectory(foo)
 
 # $ make -C build DESTDIR=~/myapp install
+install(TARGETS main)
+install(TARGETS foo)
 #file(GLOB LIBRARIES ../lib/*.so*) # external libraries
 #install(FILES ${LIBRARIES} DESTINATION lib)
 $
@@ -54,15 +57,12 @@ file(GLOB SOURCES *.c) # .cpp
 add_library(foo SHARED ${SOURCES})
 target_include_directories(foo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(foo PROPERTIES VERSION 1.2.3 SOVERSION 1)
-install(TARGETS foo)
 $
 
 $ cat main/CMakeLists.txt
 file(GLOB SOURCES *.c) # .cpp
 add_executable(main ${SOURCES})
 target_link_libraries(main PRIVATE foo)
-set_target_properties(main PROPERTIES INSTALL_RPATH "$ORIGIN/../lib")
-install(TARGETS main)
 $
 
 $ cat foo/foo.c
@@ -135,7 +135,7 @@ set(CMAKE_INSTALL_RPATH $ORIGIN/../lib)
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
     add_link_options(-fsanitize=address)
 endif()
-#link_libraries(foo)
+#link_libraries(-lfoo) # linker flag -l
 #link_directories(../foo)
 #include_directories(../foo)
 #add_compile_definitions(VAR) # VAR=value
@@ -154,6 +154,12 @@ install(TARGETS main) # foo
 #install(FILES ${LIBRARIES} DESTINATION lib)
 
 $
+
+Note:
+
+link_libraries(-lfoo) # foo is a file, eg.: libfoo.so, or, libfoo.a,
+
+link_libraries(foo) # foo is a cmake target.
 
 
 ---
