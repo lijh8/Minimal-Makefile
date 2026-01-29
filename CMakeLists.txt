@@ -1,3 +1,14 @@
+https://cmake.org/cmake/help/book/mastering-cmake/
+https://cmake.org/cmake/help/latest/
+
+https://cmake.org/features/
+Target-centric approach
+
+Modern CMake allows the build to be specified as a set of targets (executables,
+libraries, custom commands). Each target defines what other targets it depends
+on directly. CMake then performs the build in the correct order and includes
+transitive link targets.
+
 $ pwd
 /home/user1/doc/myapp/src
 $ ls
@@ -55,36 +66,43 @@ install(TARGETS main)
 $
 
 $ cat foo/foo.c
-#include <stdio.h>
 #include <limits.h>
+#include <stdbool.h>
 #include "foo.h"
 
-void foo()
+bool add(int a, int b, int *result)
 {
-    int a = INT_MAX;
-    int b = INT_MAX;
-    int c = a + b;
-    printf("%s\n", __func__);
+    // if (b < 0 && a < INT_MIN - b || b > 0 && a > INT_MAX - b)
+    //     return false;
+
+    *result = a + b;
+    return true;
 }
 $
 $ cat foo/foo.h
 #ifndef foo_h
 #define foo_h
 
-void foo();
+#include <stdbool.h>
+
+bool add(int a, int b, int *result);
 
 #endif
 $
 $ cat main/main.c
 #include <stdio.h>
+#include <limits.h>
+#include <stdbool.h>
 #include "foo.h"
 
 int main()
 {
-    int a[10];
-    printf("%d\n", a[sizeof(a)]);
-    printf("%s\n", __func__);
-    foo();
+    int sum;
+    int a = INT_MAX;
+    int b = INT_MAX;
+    bool ret = add(a, b, &sum);
+
+    // /home/ljh/doc/myapp/src/foo/foo.c:10:17: runtime error: signed integer overflow: 2147483647 + 2147483647 cannot be represented in type 'int'
 }
 $
 
@@ -192,15 +210,17 @@ CMake target-level link:
 
 target_link_libraries(main PUBLIC foo)
 
-. 这是 modern CMake 的目标级别链接;
+. 这是 Modern CMake 的目标级别链接;
 
 . 使用被链接目标中的完整库文件路径 ../foo/libfoo.so.1.2.3 ,
   而非使用 ` -L/path/to `, ` -lfoo ` ,
-  这适用静态库 ` .a `, 或动态共享库 ` .so ` ;
+  这适用于静态库 ` .a `, 或动态共享库 ` .so ` ;
 
-. 传递被链接目标中 target_include_directories 命令,
+. Propagate transitive usage requirements,
+  https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html#target-usage-requirements ,
+  传递被链接目标中 target_include_directories 命令,
   其中的 PUBLIC, INTERFACE 公开的头文件包含路径,
-  自动获得头文件包含路径 include ` -I ` ;
+  自动获得头文件包含路径 include ` -I/header/include/path/ ` ;
 
 . 管理依赖，先构建被链接目标;
 
@@ -210,17 +230,11 @@ target_link_libraries(main PUBLIC foo)
 
 执行配置:
 当修改/增/删 CMakeLists.txt, 增/删 C, C++ 文件或目录结构时;
+$ cmake -B build -S . # -DCMAKE_BUILD_TYPE=Debug # Release
 
 执行构建:
 当只修改了现有 C, C++ 文件中代码时;
-
-$ cmake -B build -S . # -DCMAKE_BUILD_TYPE=Debug # Release
 $ cmake --build build -j4 # --target clean # -v # verbose
-
-# or,
-$ mkdir build && cd build
-$ cmake .. # -DCMAKE_BUILD_TYPE=Debug # Release
-$ make -j4 # -s # silent
 
 
 ---
