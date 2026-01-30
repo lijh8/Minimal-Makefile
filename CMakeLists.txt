@@ -28,7 +28,7 @@ $
 
 $ cat CMakeLists.txt
 cmake_minimum_required(VERSION 3.31)
-project(myapp VERSION 1.0)
+project(myapp VERSION 1.2.3)
 set(CMAKE_C_COMPILER gcc) # .cpp
 set(CMAKE_C_STANDARD 11) # .cpp
 set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE) # boolean set(): TRUE/FALSE
@@ -56,7 +56,7 @@ $ cat foo/CMakeLists.txt
 file(GLOB SOURCES *.c) # .cpp
 add_library(foo SHARED ${SOURCES})
 target_include_directories(foo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-set_target_properties(foo PROPERTIES VERSION 1.2.3 SOVERSION 1)
+set_target_properties(foo PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 $
 
 $ cat main/CMakeLists.txt
