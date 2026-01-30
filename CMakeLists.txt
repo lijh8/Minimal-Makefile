@@ -42,8 +42,8 @@ if (ENABLE_SANITIZERS)
     add_link_options(-fsanitize=address,undefined)
 endif()
 
-add_subdirectory(main)
 add_subdirectory(foo)
+add_subdirectory(main)
 
 # $ make -C build DESTDIR=~/myapp install
 install(TARGETS main)
@@ -102,7 +102,7 @@ int main()
     int b = INT_MAX;
     bool ret = add(a, b, &sum);
 
-    // /home/ljh/doc/myapp/src/foo/foo.c:10:17: runtime error: signed integer overflow: 2147483647 + 2147483647 cannot be represented in type 'int'
+    // foo.c:10:17: runtime error: signed integer overflow: 2147483647 + 2147483647 cannot be represented in type 'int'
 }
 $
 
