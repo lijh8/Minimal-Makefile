@@ -46,8 +46,8 @@ add_subdirectory(foo)
 add_subdirectory(main)
 
 # $ make -C build DESTDIR=~/myapp install
-install(TARGETS main)
 install(TARGETS foo)
+install(TARGETS main)
 #file(GLOB LIBRARIES ../lib/*.so*) # external libraries
 #install(FILES ${LIBRARIES} DESTINATION lib)
 $
