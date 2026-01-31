@@ -14,15 +14,14 @@ $ tree
 │   ├── main.c
 │   └── Makefile
 └── Makefile
-
 $
+
 
 # top-level makefile
 
 $ cat Makefile
-
-all : main #foo
-main : #foo
+all : main # foo
+# main : foo
 
 # 1. With .ONESHELL, all command lines in a recipe are treated as one unit;
 #   the prefixes @, -, and + apply only to the first command line of the recipe.
@@ -32,26 +31,26 @@ main : #foo
 .ONESHELL:
 
 foo :
-  @$(MAKE) -C $@
-  @cp $@/$@ $@/lib$@.so
+	@$(MAKE) -C $@
+	cp $@/$@ $@/lib$@.so
 main :
-  @$(MAKE) -C $@ ENABLE_SANITIZERS=$(ENABLE_SANITIZERS)
+	@$(MAKE) -C $@
 
 clean :
-  @for dir in main #foo
-  do
-          $(MAKE) -C $$dir $@
-  done
-.PHONY : all clean main #foo
+	@for dir in main # foo
+	do
+		$(MAKE) -C $$dir $@
+	done
+.PHONY : all clean main # foo
 
 # $ make ENABLE_SANITIZERS=ON
 ENABLE_SANITIZERS ?= OFF # default value when not defined
 $
 
+
 # sub-directory makefiles
 
 $ cat foo/Makefile
-
 # build dynamic library with -fPIC -shared
 CFLAGS   = -fPIC -g # -O3 # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP # -I../foo -DNDEBUG
@@ -73,8 +72,8 @@ ifeq ($(ENABLE_SANITIZERS),ON)
 endif
 $
 
-$ cat main/Makefile
 
+$ cat main/Makefile
 # build dynamic library with -fPIC -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP # -I../foo # -DNDEBUG
