@@ -395,6 +395,40 @@ This is fine too.
 ---
 
 
+$ cat Makefile
+all : main # foo
+# main : foo
+
+# 1. With .ONESHELL, all command lines in a recipe are treated as one unit;
+#   the prefixes @, -, and + apply only to the first command line of the recipe.
+# 2. line continuation backslash \ is unnecessary,
+#   all command lines in a recipe is passed to a single shell invocation.
+
+.ONESHELL:
+
+foo :
+	@$(MAKE) -C $@
+	cp $@/$@ $@/lib$@.so
+main :
+	@$(MAKE) -C $@
+
+clean :
+	@for dir in main # foo
+	do
+		$(MAKE) -C $$dir $@
+	done
+
+# all sub-directory targets should be phony
+.PHONY : all clean main # foo
+
+# $ make ENABLE_SANITIZERS=ON
+ENABLE_SANITIZERS ?= OFF # default value when not defined
+$
+
+
+---
+
+
 5.4.1 Disabling Parallel Execution
 
 If a makefile completely and accurately defines the dependency relationships
@@ -445,50 +479,63 @@ line, by putting them in the MAKEFLAGS variable. See Communicating Options to a
 Sub-make.
 
 
+$ pwd
+/home/user1/doc/myapp/src
 $ ls
-Makefile  main
+Makefile  sub
 $
 $ tree
 .
-├── main
+├── sub
 │   └── Makefile
 └── Makefile
 $
 
-# top makefile
 $ cat Makefile
-FOO=bar111
+BAR = bar
 test:
-	@$(MAKE) -C main test
-.PHONY : test
+	@echo top $(FOO)
+	@echo top $(BAR)
+	$(MAKE) -C sub
 $
 
-# sub-makefile
-$ cat main/Makefile
+$ cat sub/Makefile
 test:
-	@echo main: ${FOO}
+	@echo sub $(FOO)
+	@echo sub $(BAR)
 $
 
-
-1. when invoke make with top makefile at command line,
-  command line arguments override makefile variable,
-  and arguments are passed down to sub-makefile.
-
-$ make FOO=bar222 test
-make[1]: Entering directory '/home/ljh/doc/myapp/src/main'
-main: bar222
-make[1]: Leaving directory '/home/ljh/doc/myapp/src/main'
+# 1. command line argument
+$ make FOO=foo
+top foo
+top bar
+make[1]: Entering directory '/home/ljh/doc/myapp/src/sub'
+sub foo
+sub
+make[1]: Leaving directory '/home/ljh/doc/myapp/src/sub'
 $
 
-
-2. but ordinary variables defined in top-level makefile
-  are not passed down to sub-makefile.
-
-$ make test
-make[1]: Entering directory '/home/ljh/doc/myapp/src/main'
-main:
-make[1]: Leaving directory '/home/ljh/doc/myapp/src/main'
+# 2. environment variable
+$ FOO=foo make
+top foo
+top bar
+make[1]: Entering directory '/home/ljh/doc/myapp/src/sub'
+sub foo
+sub
+make[1]: Leaving directory '/home/ljh/doc/myapp/src/sub'
 $
+
+1. Command-line argument (e.g., make FOO=foo) is passed to sub-make
+    and overrides variable in Makefile with the same name.
+
+2. Environment variable (e.g., FOO=foo make) is inherited by sub-make,
+    but is overridden by variable in Makefile with the same name.
+
+3. Variable defined in the top-level Makefile is not automatically passed
+    to sub-make unless explicitly exported with export.
+
+4. Precedence order (highest to lowest):
+    Command-line argument > Makefile variable > Environment variable.
 
 
 ---
