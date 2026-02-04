@@ -20,6 +20,17 @@ $
 # top-level makefile
 
 $ cat Makefile
+# make shared object dynamic library with semantic version: major.minor.patch
+# $(call make_soname,1.2.3)
+define make_soname # semver
+	$(eval soname = lib$@.so.$(firstword $(subst ., ,$(1))))
+	@$(MAKE) -C $@ soname=$(soname)
+	@cp $@/$@ $@/lib$@.so.$(1)
+	@( cd $@; \
+		ln -f -s lib$@.so.$(1) $(soname); \
+		ln -f -s $(soname) lib$@.so; )
+endef
+
 all : main # foo
 # main : foo
 
@@ -31,8 +42,8 @@ all : main # foo
 .ONESHELL :
 
 foo :
-	@$(MAKE) -C $@
-	cp $@/$@ $@/lib$@.so
+	$(call make_soname,1.2.3)
+
 main :
 	@$(MAKE) -C $@
 
@@ -46,7 +57,7 @@ clean :
 .PHONY : all clean main # foo
 
 # $ make ENABLE_SANITIZERS=ON
-ENABLE_SANITIZERS ?= OFF # default value when not defined
+#ENABLE_SANITIZERS ?= OFF # default value when not defined
 $
 
 
@@ -66,11 +77,13 @@ foo: $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 clean: ; $(RM) *.o *.d foo
 .PHONY: clean
 
+LDFLAGS += -Wl,-soname,$(soname)
+
 # $ make ENABLE_SANITIZERS=ON
 ENABLE_SANITIZERS ?= OFF # default value when not defined
 ifeq ($(ENABLE_SANITIZERS),ON)
-  CFLAGS  += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
-  LDFLAGS +=    -fsanitize=address,undefined
+	CFLAGS  += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
+	LDFLAGS +=    -fsanitize=address,undefined
 endif
 $
 
@@ -78,8 +91,8 @@ $
 $ cat main/Makefile
 # build dynamic library with -fPIC -shared
 CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP # -I../foo # -DNDEBUG
-LDFLAGS  = # -L../foo # -shared -static
+CPPFLAGS = -MMD -MP # -I../foo -DNDEBUG
+LDFLAGS  = # -L../foo -shared -static
 LDLIBS   = # -lfoo
 #CC      = $(CXX) # link with CXX for .cpp
 
@@ -89,14 +102,14 @@ main: $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 clean: ; $(RM) *.o *.d main
 .PHONY: clean
 
+LDFLAGS += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
+
 # $ make ENABLE_SANITIZERS=ON
 ENABLE_SANITIZERS ?= OFF # default value when not defined
 ifeq ($(ENABLE_SANITIZERS),ON)
-  CFLAGS  += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
-  LDFLAGS +=    -fsanitize=address,undefined
+	CFLAGS  += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
+	LDFLAGS +=    -fsanitize=address,undefined
 endif
-
-LDFLAGS += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
 $
 
 

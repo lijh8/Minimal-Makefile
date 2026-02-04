@@ -35,20 +35,24 @@ $ make -p | grep -E '^[A-Za-z0-9_-]+ :?=' | vi -
 ---
 
 
-libfoo.so     ->  # symbolic link;
-libfoo.so.1   ->  # symbolic link, soname;
-libfoo.1.2.3      # actual library file;
+libfoo.so     ->  # Development symlink (for linking);
+libfoo.so.1   ->  # Runtime symlink with major version;
+libfoo.1.2.3      # Actual library file with full version;
 
 
 1. build shared object:
 
-encode the soname in the actual library file libfoo.so.1.2.3:
+the linker records soname libfoo.so.1 in DT_SONAME entry
+of actual library file libfoo.so.1.2.3:
   LDFLAGS += -Wl,-soname,libfoo.so.1
 
 create symbolic links ;
 
 $ objdump -p foo/libfoo.so  | grep -i soname
    SONAME               libfoo.so.1
+$
+$ objdump -p src/main/main | grep -E '(RPATH|RUNPATH)'
+  RUNPATH              $ORIGIN/../foo:$ORIGIN/../lib
 $
 
 
@@ -59,7 +63,9 @@ $ g++ -L../foo -lfoo -o a.out
 linker looks for libfoo.so for option ` -lfoo `;
 libfoo.so links to libfoo.so.1;
 libfoo.so.1 links to libfoo.so.1.2.3;
-the soname libfoo.so.1 in actual library file is recorded in executable a.out;
+
+the linker records soname libfoo.so.1 of actual library file libfoo.so.1.2.3
+in DT_NEEDED entry of executable a.out;
 
 $ LD_LIBRARY_PATH=foo ldd ./main/main
         libfoo.so.1 => foo/libfoo.so.1 (0x00007f3777524000)
@@ -70,8 +76,8 @@ $
 
 $ LD_LIBRARY_PATH=../foo ./a.out
 
-the soname libfoo.so.1 in executable a.out is examined,
-libfoo.so.1 links to libfoo.so.1.2.3;
+the loader reads soname libfoo.so.1 in DT_NEEDED of executable a.out,
+libfoo.so.1 links to libfoo.so.1.2.3, then loads the actual library file.
 
 
 ---
@@ -133,7 +139,8 @@ cc x.o y.o z.o -o x
 $
 
 
-recursive expansion happens when the variable is substituted / used.
+recursive expansion happens when the variable is substituted or used.
+it is late, lazy, or delayed evaluation.
 
 x = foo
 y = $(x) bar
@@ -146,7 +153,8 @@ later, later bar
 $
 
 
-simple expansion happens when the variable is defined.
+simple expansion happens when the variable is defined or assigned.
+it is early evaluation.
 
 x := foo
 y := $(x) bar            # expansion of y happens when it is defined here
