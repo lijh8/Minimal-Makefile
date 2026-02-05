@@ -92,6 +92,7 @@ clean: ; rm -fr *.o *.d foo
 LDFLAGS += -Wl,-soname,$(soname)
 
 # make BUILD_TYPE=SANITIZE
+# use release build for install by default
 BUILD_TYPE ?= RELEASE
 ifeq ($(BUILD_TYPE),SANITIZE)
     CFLAGS   += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
@@ -123,6 +124,7 @@ clean: ; rm -fr *.o *.d main
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
 
 # make BUILD_TYPE=SANITIZE
+# use release build for install by default
 BUILD_TYPE ?= RELEASE
 ifeq ($(BUILD_TYPE),SANITIZE)
     CFLAGS   += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
