@@ -17,55 +17,67 @@ $ tree
 $
 
 
-# top-level makefile
-
 $ cat Makefile
 # make shared object dynamic library with semantic version: major.minor.patch
 # $(call make_soname,1.2.3)
-define make_soname # semver
-	$(eval soname = lib$@.so.$(firstword $(subst ., ,$(1))))
-	@$(MAKE) -C $@ soname=$(soname)
-	@cp $@/$@ $@/lib$@.so.$(1)
-	@( cd $@; \
-		ln -f -s lib$@.so.$(1) $(soname); \
-		ln -f -s $(soname) lib$@.so; )
+define make_soname # target,semver
+        $(eval soname = lib$(1).so.$(firstword $(subst ., ,$(2))))
+        $(MAKE) -C $(1) soname=$(soname)
+        cp $(1)/$(1) $(1)/lib$(1).so.$(2)
+        (
+                cd $(1)
+                ln -f -s lib$(1).so.$(2) $(soname)
+                ln -f -s $(soname) lib$(1).so
+        )
 endef
 
-all : main # foo
-# main : foo
+all: main foo
+main: foo
 
 # 1. With .ONESHELL, all command lines in a recipe are treated as one unit;
 #   the prefixes @, -, and + apply only to the first command line of the recipe.
 # 2. line continuation backslash \ is unnecessary,
 #   all command lines in a recipe is passed to a single shell invocation.
 
-.ONESHELL :
+.ONESHELL:
 
-foo :
-	$(call make_soname,1.2.3)
+foo:
+        @$(call make_soname,$@,1.2.3)
 
-main :
-	@$(MAKE) -C $@
+main:
+        @$(MAKE) -C $@
 
-clean :
-	@for dir in main # foo
-	do
-		$(MAKE) -C $$dir $@
-	done
+clean:
+        @for dir in main foo
+        do
+                $(MAKE) -C $$dir $@
+        done
+
+prefix ?= /usr/local
+bindir = $(DESTDIR)$(prefix)/bin
+libdir = $(DESTDIR)$(prefix)/lib
+includedir = $(DESTDIR)$(prefix)/include
+
+installdirs = $(bindir) \
+        $(libdir) \
+        $(includedir) \
+
+$(installdirs): ; mkdir -p $@
+
+# make DESTDIR=~/myapp prefix=/usr/local install
+install: all | $(installdirs)
+        cp main/main $(bindir)/
+        cp -P foo/*.so foo/*.so.* $(libdir)/
+        cp foo/foo.h $(includedir)/
 
 # all sub-directory targets should be phony
-.PHONY : all clean main # foo
-
-# $ make ENABLE_SANITIZERS=ON
-#ENABLE_SANITIZERS ?= OFF # default value when not defined
+.PHONY: all clean install $(installdirs) main foo
 $
 
 
-# sub-directory makefiles
-
 $ cat foo/Makefile
 # build dynamic library with -fPIC -shared
-CFLAGS   = -fPIC -g # -O3 # CXXFLAGS for .cpp
+CFLAGS   = -Wall -Wextra -fPIC # -g -O3 # CXXFLAGS for .cpp
 CPPFLAGS = -MMD -MP # -I../foo -DNDEBUG
 LDFLAGS  = -shared # -L../foo -static
 LDLIBS   = # -lfoo
@@ -74,43 +86,58 @@ LDLIBS   = # -lfoo
 # target name is basename of one of the source files
 foo: $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
-clean: ; $(RM) *.o *.d foo
+clean: ; rm -fr *.o *.d foo
 .PHONY: clean
 
 LDFLAGS += -Wl,-soname,$(soname)
 
-# $ make ENABLE_SANITIZERS=ON
-ENABLE_SANITIZERS ?= OFF # default value when not defined
-ifeq ($(ENABLE_SANITIZERS),ON)
-	CFLAGS  += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
-	LDFLAGS +=    -fsanitize=address,undefined
+# make BUILD_TYPE=SANITIZE
+BUILD_TYPE ?= RELEASE # the default value works with install
+ifeq ($(BUILD_TYPE),SANITIZE)
+    CFLAGS   += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
+    LDFLAGS  += -fsanitize=address,undefined
+else ifeq ($(BUILD_TYPE),DEBUG)
+    CFLAGS   += -g # CXXFLAGS for .cpp
+else ifeq ($(BUILD_TYPE),RELEASE)
+    CFLAGS   += -O3 -DNDEBUG # CXXFLAGS for .cpp
+else
+    $(error Unknown BUILD_TYPE: $(BUILD_TYPE). Use SANITIZE, DEBUG, or RELEASE)
 endif
 $
 
 
 $ cat main/Makefile
 # build dynamic library with -fPIC -shared
-CFLAGS   = -g # -O3 -fPIC # CXXFLAGS for .cpp
-CPPFLAGS = -MMD -MP # -I../foo -DNDEBUG
-LDFLAGS  = # -L../foo -shared -static
-LDLIBS   = # -lfoo
+CFLAGS   = -Wall -Wextra # -g -O3 -fPIC # CXXFLAGS for .cpp
+CPPFLAGS = -MMD -MP -I../foo # -DNDEBUG
+LDFLAGS  = -L../foo # -shared -static
+LDLIBS   = -lfoo
 #CC      = $(CXX) # link with CXX for .cpp
 
 # target name is basename of one of the source files
 main: $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
 -include *.d
-clean: ; $(RM) *.o *.d main
+clean: ; rm -fr *.o *.d main
 .PHONY: clean
 
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
 
-# $ make ENABLE_SANITIZERS=ON
-ENABLE_SANITIZERS ?= OFF # default value when not defined
-ifeq ($(ENABLE_SANITIZERS),ON)
-	CFLAGS  += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
-	LDFLAGS +=    -fsanitize=address,undefined
+# make BUILD_TYPE=SANITIZE
+BUILD_TYPE ?= RELEASE # the default value works with install
+ifeq ($(BUILD_TYPE),SANITIZE)
+    CFLAGS   += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
+    LDFLAGS  += -fsanitize=address,undefined
+else ifeq ($(BUILD_TYPE),DEBUG)
+    CFLAGS   += -g # CXXFLAGS for .cpp
+else ifeq ($(BUILD_TYPE),RELEASE)
+    CFLAGS   += -O3 -DNDEBUG # CXXFLAGS for .cpp
+else
+    $(error Unknown BUILD_TYPE: $(BUILD_TYPE). Use SANITIZE, DEBUG, or RELEASE)
 endif
 $
+
+
+---
 
 
 $ cat foo/foo.c
@@ -153,6 +180,9 @@ int main()
   // bool ret = add(a, b, &sum);
 }
 $
+
+
+---
 
 
 // vscode extension: ms-vscode.cpptools
