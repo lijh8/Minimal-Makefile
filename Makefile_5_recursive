@@ -24,11 +24,8 @@ define make_soname # target,semver
         $(eval soname = lib$(1).so.$(firstword $(subst ., ,$(2))))
         $(MAKE) -C $(1) soname=$(soname)
         cp $(1)/$(1) $(1)/lib$(1).so.$(2)
-        (
-                cd $(1)
-                ln -f -s lib$(1).so.$(2) $(soname)
-                ln -f -s $(soname) lib$(1).so
-        )
+        ln -fs lib$(1).so.$(2) $(1)/$(soname)
+        ln -fs $(soname) $(1)/lib$(1).so
 endef
 
 all: main foo
