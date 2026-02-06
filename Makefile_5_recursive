@@ -67,11 +67,11 @@ $(installdirs): ; mkdir -p $@
 # make DESTDIR=~/myapp prefix=/usr/local install
 install: all | $(installdirs)
         cp main/main $(bindir)/
-        cp -P foo/*.so foo/*.so.* $(libdir)/
+        cp -P foo/*.so* $(libdir)/
         cp foo/foo.h $(includedir)/
 
 # all sub-directory targets should be phony
-.PHONY: all clean install $(installdirs) main foo
+.PHONY: all clean install main foo
 $
 
 
