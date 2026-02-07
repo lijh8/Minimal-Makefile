@@ -95,8 +95,8 @@ else ifeq ($(BUILD_TYPE),DEBUG)
     CFLAGS   += -g
     CXXFLAGS += -g
 else ifeq ($(BUILD_TYPE),RELEASE)
-    CFLAGS   += -O3 -DNDEBUG
-    CXXFLAGS += -O3 -DNDEBUG
+    CFLAGS   += -O3
+    CXXFLAGS += -O3
 else
     $(error Unknown BUILD_TYPE: $(BUILD_TYPE). Use SANITIZE, DEBUG, or RELEASE)
 endif
@@ -115,9 +115,9 @@ clean: ; rm -f *.o *.d $(target)
 $
 $
 $ cat src/foo/Makefile
-CFLAGS   = -fPIC
-CXXFLAGS = -fPIC
-CPPFLAGS = # -I../foo
+CFLAGS   = -fPIC # -std=c11
+CXXFLAGS = -fPIC # -std=c++11
+CPPFLAGS = # -I../foo -DNDEBUG
 LDFLAGS  = -shared # -L../foo
 LDFLAGS  += -Wl,-soname,$(soname)
 LDLIBS   = # -lfoo
@@ -126,9 +126,9 @@ include ../common.mk
 $
 $
 $ cat src/main/Makefile
-CFLAGS   =
-CXXFLAGS =
-CPPFLAGS = -I../foo
+CFLAGS   = # -std=c11
+CXXFLAGS = # -std=c++11
+CPPFLAGS = -I../foo # -DNDEBUG
 LDFLAGS  = -L../foo
 LDFLAGS  += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
 LDLIBS   = -lfoo
