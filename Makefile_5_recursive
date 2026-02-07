@@ -19,7 +19,7 @@ $
 
 $ cat Makefile
 # make shared object dynamic library with semantic version: major.minor.patch
-# $(call make_soname,1.2.3)
+# $(call make_soname,$@,1.2.3)
 define make_soname # target,semver
         $(eval soname = lib$(1).so.$(firstword $(subst ., ,$(2))))
         $(MAKE) -C $(1) soname=$(soname)
