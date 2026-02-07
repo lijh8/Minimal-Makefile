@@ -10,11 +10,11 @@ $ tree
 └── src
     ├── common.mk
     ├── foo
-    │   ├── foo.cpp
+    │   ├── foo.c
     │   ├── foo.h
     │   └── Makefile
     ├── main
-    │   ├── main.cpp
+    │   ├── main.c
     │   └── Makefile
     └── Makefile
 
@@ -37,7 +37,7 @@ main: foo
 
 # 1. With .ONESHELL, all command lines in a recipe are treated as one unit;
 #   the prefixes @, -, and + apply only to the first command line of the recipe.
-# 2. line continuation backslash \ is unnecessary,
+# 2. Line continuation backslash \ is unnecessary,
 #   all command lines in a recipe is passed to a single shell invocation.
 
 .ONESHELL:
@@ -129,7 +129,7 @@ $ cat src/main/Makefile
 CFLAGS   = # -std=c11
 CXXFLAGS = # -std=c++11
 CPPFLAGS = -I../foo # -DNDEBUG
-LDFLAGS  = -L../foo
+LDFLAGS  = -L../foo # -shared
 LDFLAGS  += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
 LDLIBS   = -lfoo
 target   = main
