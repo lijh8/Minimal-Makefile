@@ -1,26 +1,27 @@
 Recursive makefile
 
 $ pwd
-/path/to/myapp/src
+/home/ljh/doc/hello_cpp/src
 $ ls
 Makefile  foo  main
 $ tree
 .
 ├── foo
-│   ├── foo.c
+│   ├── foo.cpp
 │   ├── foo.h
 │   └── Makefile
 ├── main
-│   ├── main.c
+│   ├── main.cpp
 │   └── Makefile
 └── Makefile
+
+3 directories, 6 files
 $
-
-
+$
 $ cat Makefile
-# make shared object dynamic library with semantic version: major.minor.patch
-# $(call make_soname,$@,1.2.3)
-define make_soname # target,semver
+# make shared object with semantic version: major.minor.patch
+# $(call mksoname,$@,1.2.3)
+define mksoname # target,semver
         $(eval soname = lib$(1).so.$(firstword $(subst ., ,$(2))))
         $(MAKE) -C $(1) soname=$(soname)
         cp $(1)/$(1) $(1)/lib$(1).so.$(2)
@@ -38,8 +39,11 @@ main: foo
 
 .ONESHELL:
 
+# all sub-directory targets should be phony
+.PHONY: all clean install main foo
+
 foo:
-        @$(call make_soname,$@,1.2.3)
+        @$(call mksoname,$@,1.2.3)
 
 main:
         @$(MAKE) -C $@
@@ -66,24 +70,29 @@ install: all | $(installdirs)
         cp main/main $(bindir)/
         cp -P foo/*.so* $(libdir)/
         cp foo/foo.h $(includedir)/
-
-# all sub-directory targets should be phony
-.PHONY: all clean install main foo
 $
-
-
+$
 $ cat foo/Makefile
 # build dynamic library with -fPIC -shared
 CFLAGS   = -Wall -Wextra -fPIC # -g -O3 # CXXFLAGS for .cpp
+CXXFLAGS = -Wall -Wextra -fPIC # -g -O3
 CPPFLAGS = -MMD -MP # -I../foo -DNDEBUG
 LDFLAGS  = -shared # -L../foo -static
 LDLIBS   = # -lfoo
 #CC      = $(CXX) # link with CXX for .cpp
 
+ifneq ($(wildcard *.cpp),)
+    CC   = $(CXX) # link with CXX for .cpp
+    ext  = .cpp
+else
+    ext  = .c
+endif
+target   = foo
+
 # target name is basename of one of the source files
-foo: $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+$(target): $(patsubst %$(ext),%.o,$(wildcard *$(ext))) # .cpp
 -include *.d
-clean: ; rm -fr *.o *.d foo
+clean: ; rm -fr *.o *.d $(target)
 .PHONY: clean
 
 LDFLAGS += -Wl,-soname,$(soname)
@@ -92,30 +101,42 @@ LDFLAGS += -Wl,-soname,$(soname)
 # use release build for install by default
 BUILD_TYPE ?= RELEASE
 ifeq ($(BUILD_TYPE),SANITIZE)
-    CFLAGS   += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
-    LDFLAGS  += -fsanitize=address,undefined
+    SANITIZE_FLAGS = -fsanitize=address,undefined
+    CFLAGS   += -g $(SANITIZE_FLAGS) # CXXFLAGS for .cpp
+    CXXFLAGS += -g $(SANITIZE_FLAGS)
+    LDFLAGS  += $(SANITIZE_FLAGS)
 else ifeq ($(BUILD_TYPE),DEBUG)
     CFLAGS   += -g # CXXFLAGS for .cpp
+    CXXFLAGS += -g
 else ifeq ($(BUILD_TYPE),RELEASE)
     CFLAGS   += -O3 -DNDEBUG # CXXFLAGS for .cpp
+    CXXFLAGS += -O3 -DNDEBUG
 else
     $(error Unknown BUILD_TYPE: $(BUILD_TYPE). Use SANITIZE, DEBUG, or RELEASE)
 endif
 $
-
-
+$
 $ cat main/Makefile
 # build dynamic library with -fPIC -shared
 CFLAGS   = -Wall -Wextra # -g -O3 -fPIC # CXXFLAGS for .cpp
+CXXFLAGS = -Wall -Wextra # -g -O3 -fPIC
 CPPFLAGS = -MMD -MP -I../foo # -DNDEBUG
 LDFLAGS  = -L../foo # -shared -static
 LDLIBS   = -lfoo
 #CC      = $(CXX) # link with CXX for .cpp
 
+ifneq ($(wildcard *.cpp),)
+    CC   = $(CXX) # link with CXX for .cpp
+    ext  = .cpp
+else
+    ext  = .c
+endif
+target   = main
+
 # target name is basename of one of the source files
-main: $(patsubst %.c,%.o,$(wildcard *.c)) # .cpp
+$(target): $(patsubst %$(ext),%.o,$(wildcard *$(ext))) # .cpp
 -include *.d
-clean: ; rm -fr *.o *.d main
+clean: ; rm -fr *.o *.d $(target)
 .PHONY: clean
 
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
@@ -124,12 +145,16 @@ LDFLAGS += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
 # use release build for install by default
 BUILD_TYPE ?= RELEASE
 ifeq ($(BUILD_TYPE),SANITIZE)
-    CFLAGS   += -g -fsanitize=address,undefined # CXXFLAGS for .cpp
-    LDFLAGS  += -fsanitize=address,undefined
+    SANITIZE_FLAGS = -fsanitize=address,undefined
+    CFLAGS   += -g $(SANITIZE_FLAGS) # CXXFLAGS for .cpp
+    CXXFLAGS += -g $(SANITIZE_FLAGS)
+    LDFLAGS  += $(SANITIZE_FLAGS)
 else ifeq ($(BUILD_TYPE),DEBUG)
     CFLAGS   += -g # CXXFLAGS for .cpp
+    CXXFLAGS += -g
 else ifeq ($(BUILD_TYPE),RELEASE)
     CFLAGS   += -O3 -DNDEBUG # CXXFLAGS for .cpp
+    CXXFLAGS += -O3 -DNDEBUG
 else
     $(error Unknown BUILD_TYPE: $(BUILD_TYPE). Use SANITIZE, DEBUG, or RELEASE)
 endif
@@ -467,7 +492,7 @@ $
 
 
 $ cat v2
-define make_soname # semver
+define mksoname # semver
 	$(eval soname = lib$@.so.$(firstword $(subst ., ,$(1))))
 	@$(MAKE) -C $@ soname=$(soname)
 	@cp $@/$@ $@/lib$@.so.$(1)
@@ -485,7 +510,7 @@ install : $(libdirs) $(maindirs)
 main : foo
 
 foo :
-	$(call make_soname,1.2.3)
+	$(call mksoname,1.2.3)
 
 $(maindirs) :
 	@$(MAKE) -C $@
