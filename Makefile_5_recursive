@@ -1,5 +1,6 @@
 Recursive makefile
 
+
 $ pwd
 /home/ljh/doc/hello_cpp/src
 $ ls
@@ -80,31 +81,16 @@ CPPFLAGS = -MMD -MP # -I../foo -DNDEBUG
 LDFLAGS  = -shared # -L../foo -static
 LDLIBS   = # -lfoo
 #CC      = $(CXX) # link with CXX for .cpp
-
-ifneq ($(wildcard *.cpp),)
-    CC   = $(CXX) # link with CXX for .cpp
-    ext  = .cpp
-else
-    ext  = .c
-endif
-target   = foo
-
-# target name is basename of one of the source files
-$(target): $(patsubst %$(ext),%.o,$(wildcard *$(ext))) # .cpp
--include *.d
-clean: ; rm -fr *.o *.d $(target)
-.PHONY: clean
-
 LDFLAGS += -Wl,-soname,$(soname)
 
 # make BUILD_TYPE=SANITIZE
 # use release build for install by default
 BUILD_TYPE ?= RELEASE
 ifeq ($(BUILD_TYPE),SANITIZE)
-    SANITIZE_FLAGS = -fsanitize=address,undefined
-    CFLAGS   += -g $(SANITIZE_FLAGS) # CXXFLAGS for .cpp
-    CXXFLAGS += -g $(SANITIZE_FLAGS)
-    LDFLAGS  += $(SANITIZE_FLAGS)
+    SANITIZE  = -fsanitize=address,undefined
+    CFLAGS   += -g $(SANITIZE) # CXXFLAGS for .cpp
+    CXXFLAGS += -g $(SANITIZE)
+    LDFLAGS  += $(SANITIZE)
 else ifeq ($(BUILD_TYPE),DEBUG)
     CFLAGS   += -g # CXXFLAGS for .cpp
     CXXFLAGS += -g
@@ -114,6 +100,19 @@ else ifeq ($(BUILD_TYPE),RELEASE)
 else
     $(error Unknown BUILD_TYPE: $(BUILD_TYPE). Use SANITIZE, DEBUG, or RELEASE)
 endif
+
+ext      = .c
+ifneq ($(wildcard *.cpp),)
+    CC   = $(CXX) # link with CXX for .cpp
+    ext  = .cpp
+endif
+target   = foo
+
+# target name is basename of one of the source files
+$(target): $(patsubst %$(ext),%.o,$(wildcard *$(ext))) # .cpp
+-include *.d
+clean: ; rm -fr *.o *.d $(target)
+.PHONY: clean
 $
 $
 $ cat main/Makefile
@@ -124,31 +123,16 @@ CPPFLAGS = -MMD -MP -I../foo # -DNDEBUG
 LDFLAGS  = -L../foo # -shared -static
 LDLIBS   = -lfoo
 #CC      = $(CXX) # link with CXX for .cpp
-
-ifneq ($(wildcard *.cpp),)
-    CC   = $(CXX) # link with CXX for .cpp
-    ext  = .cpp
-else
-    ext  = .c
-endif
-target   = main
-
-# target name is basename of one of the source files
-$(target): $(patsubst %$(ext),%.o,$(wildcard *$(ext))) # .cpp
--include *.d
-clean: ; rm -fr *.o *.d $(target)
-.PHONY: clean
-
 LDFLAGS += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
 
 # make BUILD_TYPE=SANITIZE
 # use release build for install by default
 BUILD_TYPE ?= RELEASE
 ifeq ($(BUILD_TYPE),SANITIZE)
-    SANITIZE_FLAGS = -fsanitize=address,undefined
-    CFLAGS   += -g $(SANITIZE_FLAGS) # CXXFLAGS for .cpp
-    CXXFLAGS += -g $(SANITIZE_FLAGS)
-    LDFLAGS  += $(SANITIZE_FLAGS)
+    SANITIZE  = -fsanitize=address,undefined
+    CFLAGS   += -g $(SANITIZE) # CXXFLAGS for .cpp
+    CXXFLAGS += -g $(SANITIZE)
+    LDFLAGS  += $(SANITIZE)
 else ifeq ($(BUILD_TYPE),DEBUG)
     CFLAGS   += -g # CXXFLAGS for .cpp
     CXXFLAGS += -g
@@ -158,6 +142,19 @@ else ifeq ($(BUILD_TYPE),RELEASE)
 else
     $(error Unknown BUILD_TYPE: $(BUILD_TYPE). Use SANITIZE, DEBUG, or RELEASE)
 endif
+
+ext      = .c
+ifneq ($(wildcard *.cpp),)
+    CC   = $(CXX) # link with CXX for .cpp
+    ext  = .cpp
+endif
+target   = main
+
+# target name is basename of one of the source files
+$(target): $(patsubst %$(ext),%.o,$(wildcard *$(ext))) # .cpp
+-include *.d
+clean: ; rm -fr *.o *.d $(target)
+.PHONY: clean
 $
 
 
