@@ -167,10 +167,9 @@ $(error Unknown LINK_TYPE: $(LINK_TYPE). Use DYNAMIC or STATIC)
 endif
 
 all: $(target)
-
 include ../common.mk
 clean: ; rm -f *.o *.d $(target)
-.PHONY: clean
+.PHONY: all clean
 $
 $
 $ cat src/foo/foo.h
@@ -184,6 +183,7 @@ $ cat src/foo/foo.h
 bool add(int a, int b, int *result);
 
 #endif
+$
 $
 $ cat src/foo/foo.c
 #include <stdio.h>
