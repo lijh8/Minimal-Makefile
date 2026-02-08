@@ -103,7 +103,7 @@ endif
 ext = .c
 ifneq ($(wildcard *.cpp),)
 ext = .cpp
-CC = $(CXX)
+CC  = $(CXX)
 endif
 
 # archive
@@ -158,7 +158,7 @@ target   = main
 # make LINK_TYPE=DYNAMIC
 LINK_TYPE ?= DYNAMIC
 ifeq ($(LINK_TYPE),DYNAMIC)
-LDFLAGS  += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
+LDFLAGS += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
 else ifeq ($(LINK_TYPE),STATIC)
 LDFLAGS += -static
 else
