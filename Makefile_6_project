@@ -131,12 +131,12 @@ semver   = 1.2.3
 soname   = lib$(target).so.$(firstword $(subst ., ,$(semver)))
 LDFLAGS  += -Wl,-soname,$(soname)
 
-all: $(target) lib$(target).so lib$(target).a
+all: $(target) lib$(target).so $(soname) lib$(target).so.$(semver) lib$(target).a
 
-lib$(target).so: $(target)
-        cp $< lib$(target).so.$(semver)
+lib$(target).so $(soname) lib$(target).so.$(semver): $(target)
+        cp $(target) lib$(target).so.$(semver)
         ln -fs lib$(target).so.$(semver) $(soname)
-        ln -fs $(soname) $@
+        ln -fs $(soname) lib$(target).so
 
 lib$(target).a: lib$(target).a($(patsubst %.c,%.o,$(wildcard *.c)))
 include ../common.mk
