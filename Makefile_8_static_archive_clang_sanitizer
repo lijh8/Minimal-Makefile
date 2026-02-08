@@ -116,6 +116,35 @@ LDFLAGS  += -fsanitize=address,leak,undefined  # CXXFLAGS for .cpp
 #CFLAGS  += -fsanitize=memory -fPIE  # CXXFLAGS for .cpp
 #LDFLAGS += -fsanitize=memory -pie
 
+
+#
+
+
+// LSan normally runs only at program exit.
+// In a forever loop long-running service process,
+// the program never exits, so memory leaks are never reported.
+// Therefore, manual triggers (SIGCONT + __lsan_do_recoverable_leak_check()) are
+// the only practical way to detect leaks during operation.
+
+// $ nohup ./a.out &
+// $ kill -CONT 12345 # pid
+
+$ vi main.c
+#include <sanitizer/lsan_interface.h>
+
+void handlerCont(int signum) {
+    printf("SIGCONT %d\n", signum);
+#ifndef NDEBUG
+    __lsan_do_recoverable_leak_check();
+#endif
+}
+
+int main() {
+    signal(SIGCONT, handlerCont); // $ man 7 signal
+    //...
+}
+
+
 #
 
 

@@ -12,30 +12,25 @@ $ tree
     ├── foo
     │   ├── foo.c
     │   ├── foo.h
+    │   ├── libfoo.a
+    │   ├── libfoo.so -> libfoo.so.1
+    │   ├── libfoo.so.1 -> libfoo.so.1.2.3
+    │   ├── libfoo.so.1.2.3
     │   └── Makefile
     ├── main
     │   ├── main.c
     │   └── Makefile
     └── Makefile
 
-4 directories, 7 files
+4 directories, 11 files
 $
 $
 $ cat src/Makefile
 # top-level makefile in recursive use
 MAKEFLAGS += --no-print-directory
 
-# semver: major.minor.patch, e.g., 1.2.3
-# $(call mksoname,dir,target,semver)
-define mksoname # dir,target,semver
-        $(eval soname = lib$(2).so.$(firstword $(subst ., ,$(3))))
-        $(MAKE) -C $(1) soname=$(soname)
-        cp $(1)/$(2) $(1)/lib$(2).so.$(3)
-        ln -fs lib$(2).so.$(3) $(1)/$(soname)
-        ln -fs $(soname) $(1)/lib$(2).so
-endef
-
-all: main foo
+subdirs = main foo
+all: $(subdirs)
 main: foo
 
 # 1. With .ONESHELL, all command lines in a recipe are treated as one unit;
@@ -46,19 +41,16 @@ main: foo
 .ONESHELL:
 
 # all sub-directory targets should be phony
-.PHONY: all clean install main foo
+.PHONY: all clean install $(subdirs)
 
-foo:
-        @$(call mksoname,$@,foo,1.2.3)
-
-main:
-        @$(MAKE) -C $@
+$(subdirs):
+	@$(MAKE) -C $@
 
 clean:
-        @for dir in main foo
-        do
-                $(MAKE) -C $$dir $@
-        done
+	@for dir in $(subdirs)
+	do
+		$(MAKE) -C $$dir $@
+	done
 
 prefix ?= /usr/local
 bindir = $(DESTDIR)$(prefix)/bin
@@ -66,56 +58,62 @@ libdir = $(DESTDIR)$(prefix)/lib
 includedir = $(DESTDIR)$(prefix)/include
 
 installdirs = $(bindir) \
-        $(libdir) \
-        $(includedir) \
+	$(libdir) \
+	$(includedir) \
 
 $(installdirs): ; mkdir -p $@
 
 # make DESTDIR=~/myapp prefix=/usr/local install
 install: all | $(installdirs)
-        cp main/main $(bindir)/
-        cp -P foo/*.so* $(libdir)/
-        cp foo/foo.h $(includedir)/
+	cp main/main $(bindir)/
+	cp -P foo/*.so* $(libdir)/
+	cp foo/foo.h $(includedir)/
 $
 $
 $ cat src/common.mk
 # common.mk
 # build dynamic library with -fPIC -shared
+# fully static link archive with -static
 CFLAGS   += -Wall -Wextra # -g -O3 -std=c11 -fPIC
 CXXFLAGS += -Wall -Wextra # -g -O3 -std=c++11 -fPIC
 CPPFLAGS += -MMD -MP # -I../foo -DNDEBUG
 LDFLAGS  += # -L../foo -shared -static
 LDLIBS   += # -lfoo
+ARFLAGS  = rvU
 
 # make BUILD_TYPE=SANITIZE
 # use release build for install by default
 BUILD_TYPE ?= RELEASE
 ifeq ($(BUILD_TYPE),SANITIZE)
-        SANITIZE = -fsanitize=address,undefined
-        CFLAGS   += -g $(SANITIZE)
-        CXXFLAGS += -g $(SANITIZE)
-        LDFLAGS  += $(SANITIZE)
+SANITIZE = -fsanitize=address,undefined
+CFLAGS   += -g $(SANITIZE)
+CXXFLAGS += -g $(SANITIZE)
+LDFLAGS  += $(SANITIZE)
 else ifeq ($(BUILD_TYPE),DEBUG)
-        CFLAGS   += -g
-        CXXFLAGS += -g
+CFLAGS   += -g
+CXXFLAGS += -g
 else ifeq ($(BUILD_TYPE),RELEASE)
-        CFLAGS   += -O3
-        CXXFLAGS += -O3
+CFLAGS   += -O3
+CXXFLAGS += -O3
 else
-        $(error Unknown BUILD_TYPE: $(BUILD_TYPE). Use SANITIZE, DEBUG, or RELEASE)
+# better without indent here, tab indent will make it recipe and wrong.
+$(error Unknown BUILD_TYPE: $(BUILD_TYPE). Use SANITIZE, DEBUG, or RELEASE)
 endif
 
 ext = .c
 ifneq ($(wildcard *.cpp),)
-        ext = .cpp
-        CC = $(CXX)
+ext = .cpp
+CC = $(CXX)
 endif
+
+# archive
+(%): % ;
+%.a: ; $(AR) $(ARFLAGS) $@ $?
 
 # target name is basename of one of the source files
 $(target): $(patsubst %$(ext),%.o,$(wildcard *$(ext)))
+
 -include *.d
-.PHONY: clean
-clean: ; rm -f *.o *.d $(target)
 $
 $
 $ cat src/foo/Makefile
@@ -124,10 +122,26 @@ CFLAGS   = -fPIC # -std=c11
 CXXFLAGS = -fPIC # -std=c++11
 CPPFLAGS = # -I../foo -DNDEBUG
 LDFLAGS  = -shared # -L../foo
-LDFLAGS  += -Wl,-soname,$(soname)
 LDLIBS   = # -lfoo
+
+# target name may be different from sub-directory name
 target   = foo
+semver   = 1.2.3
+
+soname   = lib$(target).so.$(firstword $(subst ., ,$(semver)))
+LDFLAGS  += -Wl,-soname,$(soname)
+
+all: $(target) lib$(target).so lib$(target).a
+
+lib$(target).so: $(target)
+	cp $< lib$(target).so.$(semver)
+	ln -fs lib$(target).so.$(semver) $(soname)
+	ln -fs $(soname) $@
+
+lib$(target).a: lib$(target).a($(patsubst %.c,%.o,$(wildcard *.c)))
 include ../common.mk
+clean: ; rm -f *.o *.d $(target) # lib*.so* lib*.a
+.PHONY: all clean
 $
 $
 $ cat src/main/Makefile
@@ -136,54 +150,69 @@ CFLAGS   = # -std=c11
 CXXFLAGS = # -std=c++11
 CPPFLAGS = -I../foo # -DNDEBUG
 LDFLAGS  = -L../foo # -shared
-LDFLAGS  += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
 LDLIBS   = -lfoo
+
+# target name may be different from sub-directory name
 target   = main
+
+# make LINK_TYPE=DYNAMIC
+LINK_TYPE ?= DYNAMIC
+ifeq ($(LINK_TYPE),DYNAMIC)
+LDFLAGS  += -Wl,-rpath,'$$ORIGIN/../foo:$$ORIGIN/../lib'
+else ifeq ($(LINK_TYPE),STATIC)
+LDFLAGS += -static
+else
+$(error Unknown LINK_TYPE: $(LINK_TYPE). Use DYNAMIC or STATIC)
+endif
+
 include ../common.mk
+clean: ; rm -f *.o *.d $(target)
+.PHONY: clean
 $
+$
+$ cat src/foo/foo.h
+#ifndef foo_h
+#define foo_h
 
+#include <stdbool.h>
 
----
+#define LOG(fmt, ...) printf("%s:%d: " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 
+bool add(int a, int b, int *result);
 
-$ cat foo/foo.c
+#endif
+$
+$ cat src/foo/foo.c
+#include <stdio.h>
 #include <limits.h>
 #include <stdbool.h>
 #include "foo.h"
 
 bool add(int a, int b, int *result)
 {
-  // if (b < 0 && a < INT_MIN - b || b > 0 && a > INT_MAX - b)
-  //     return false;
+    // if (b < 0 && a < INT_MIN - b || b > 0 && a > INT_MAX - b)
+    //     return false;
 
-  *result = a + b; // overflow will be reported by sanitizers
-  return true;
+    *result = a + b;
+    LOG("%s", "add");
+
+    return true;
 }
 $
-
-$ cat foo/foo.h
-#ifndef foo_h
-#define foo_h
-
-#include <stdbool.h>
-
-bool add(int a, int b, int *result);
-
-#endif
 $
-
-$ cat main/main.c
+$ cat src/main/main.c
 #include <stdio.h>
 #include <limits.h>
 #include <stdbool.h>
-// #include "foo.h"
+#include "foo.h"
 
 int main()
 {
-  int sum;
-  int a = INT_MAX;
-  int b = INT_MAX;
-  // bool ret = add(a, b, &sum);
+    int sum;
+    int a = INT_MAX;
+    int b = INT_MAX;
+    bool ret = add(a, b, &sum);
+    LOG("%s", "main");
 }
 $
 
@@ -202,14 +231,14 @@ $ cat .vscode/tasks.json
       "command": "make",
       "args": [],
       "options": {
-        "cwd": "${fileDirname}"
+	"cwd": "${fileDirname}"
       },
       "problemMatcher": [
-        "$gcc"
+	"$gcc"
       ],
       "group": {
-        "kind": "build",
-        "isDefault": true
+	"kind": "build",
+	"isDefault": true
       },
       "detail": "Task generated by Debugger."
     }
@@ -231,28 +260,28 @@ $ cat .vscode/launch.json
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
       "environment": [
-        {
-          "name": "LD_LIBRARY_PATH",
-          "value": "${workspaceFolder}/src/foo:/home/ljh/Downloads/ng-log-0.8.2/build"
-        },
-        {
-          "name": "NGLOG_alsologtostderr",
-          "value": "1"
-        }
+	{
+	  "name": "LD_LIBRARY_PATH",
+	  "value": "${workspaceFolder}/src/foo:/home/ljh/Downloads/ng-log-0.8.2/build"
+	},
+	{
+	  "name": "NGLOG_alsologtostderr",
+	  "value": "1"
+	}
       ],
       "externalConsole": false,
       "MIMode": "gdb",
       "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        },
-        {
-          "description": "Set Disassembly Flavor to Intel",
-          "text": "-gdb-set disassembly-flavor intel",
-          "ignoreFailures": true
-        }
+	{
+	  "description": "Enable pretty-printing for gdb",
+	  "text": "-enable-pretty-printing",
+	  "ignoreFailures": true
+	},
+	{
+	  "description": "Set Disassembly Flavor to Intel",
+	  "text": "-gdb-set disassembly-flavor intel",
+	  "ignoreFailures": true
+	}
       ],
       "preLaunchTask": "make",
     }
