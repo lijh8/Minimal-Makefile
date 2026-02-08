@@ -22,14 +22,14 @@ $ tree
 $
 $
 $ cat src/Makefile
-# make shared object with semantic version: major.minor.patch
-# $(call mksoname,$@,1.2.3)
-define mksoname # target,semver
-        $(eval soname = lib$(1).so.$(firstword $(subst ., ,$(2))))
+# semver: major.minor.patch, e.g., 1.2.3
+# $(call mksoname,dir,target,semver)
+define mksoname # dir,target,semver
+        $(eval soname = lib$(2).so.$(firstword $(subst ., ,$(3))))
         $(MAKE) -C $(1) soname=$(soname)
-        cp $(1)/$(1) $(1)/lib$(1).so.$(2)
-        ln -fs lib$(1).so.$(2) $(1)/$(soname)
-        ln -fs $(soname) $(1)/lib$(1).so
+        cp $(1)/$(2) $(1)/lib$(2).so.$(3)
+        ln -fs lib$(2).so.$(3) $(1)/$(soname)
+        ln -fs $(soname) $(1)/lib$(2).so
 endef
 
 all: main foo
@@ -46,7 +46,7 @@ main: foo
 .PHONY: all clean install main foo
 
 foo:
-        @$(call mksoname,$@,1.2.3)
+        @$(call mksoname,$@,foo,1.2.3)
 
 main:
         @$(MAKE) -C $@
